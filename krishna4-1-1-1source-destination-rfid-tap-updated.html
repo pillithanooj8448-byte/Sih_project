@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TGRTC Smart Bus Pass</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:Arial,sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh;}
+.page{display:none;min-height:100vh;flex-direction:column;}
+.page.active{display:flex;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 15%,rgba(59,130,246,0.06),transparent 55%),radial-gradient(ellipse at 85% 85%,rgba(6,182,212,0.05),transparent 55%);pointer-events:none;z-index:0;}
+
+/* LANDING */
+#landing{align-items:center;justify-content:center;padding:2rem;text-align:center;position:relative;z-index:1;}
+.brand-chip{display:inline-block;padding:6px 18px;border-radius:999px;background:rgba(37,99,235,0.1);border:1px solid rgba(59,130,246,0.3);color:#2563eb;font-size:11px;letter-spacing:4px;margin-bottom:20px;}
+h1.hero{font-size:clamp(2rem,6vw,3.5rem);font-weight:900;line-height:1.1;letter-spacing:-1px;margin-bottom:14px;background:linear-gradient(135deg,#1e293b 30%,#2563eb 65%,#0891b2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-sub{color:#64748b;font-size:15px;margin-bottom:40px;max-width:420px;line-height:1.7;}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:780px;width:100%;}
+@media(max-width:620px){.pgrid{grid-template-columns:1fr;max-width:320px;}}
+.pcard{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:28px 20px;cursor:pointer;transition:all .3s;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.pcard:hover{transform:translateY(-6px);border-color:#3b82f6;box-shadow:0 8px 28px rgba(37,99,235,0.15);}
+.pcard-icon{width:50px;height:50px;border-radius:14px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.ic-b{background:rgba(37,99,235,0.1);border:1px solid rgba(59,130,246,0.25);}
+.ic-g{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);}
+.ic-y{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);}
+.pcard h3{font-size:14px;font-weight:700;letter-spacing:2px;margin-bottom:8px;color:#1e293b;}
+.pcard p{font-size:12px;color:#64748b;line-height:1.6;margin-bottom:18px;}
+.pc-btn{width:100%;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .25s;}
+.pb-b{background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;}
+.pb-g{background:linear-gradient(135deg,#059669,#10b981);color:#fff;}
+.pb-y{background:linear-gradient(135deg,#d97706,#fbbf24);color:#000;}
+.pc-btn:hover{filter:brightness(1.1);}
+
+/* AUTH */
+#auth{align-items:center;justify-content:center;padding:2rem;position:relative;z-index:1;}
+.abox{width:100%;max-width:420px;background:#fff;border:1px solid #e2e8f0;border-radius:22px;padding:32px;box-shadow:0 8px 32px rgba(0,0,0,0.08);}
+.role-chip{display:inline-block;padding:4px 14px;border-radius:999px;font-size:11px;letter-spacing:2px;margin-bottom:12px;}
+.rc-p{background:rgba(59,130,246,0.1);color:#2563eb;border:1px solid rgba(59,130,246,0.3);}
+.rc-c{background:rgba(16,185,129,0.1);color:#059669;border:1px solid rgba(16,185,129,0.28);}
+.rc-a{background:rgba(245,158,11,0.1);color:#d97706;border:1px solid rgba(245,158,11,0.28);}
+.abox h2{font-size:24px;font-weight:800;margin-bottom:4px;color:#1e293b;}
+.abox .asub{font-size:13px;color:#64748b;margin-bottom:22px;}
+.alert{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;display:none;}
+.alert.show{display:block;}
+.ae{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;}
+.as{background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;}
+.fg{margin-bottom:14px;}
+label{display:block;font-size:11px;letter-spacing:2px;color:#64748b;margin-bottom:6px;}
+input,select{width:100%;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:11px;color:#1e293b;font-size:14px;outline:none;transition:border .25s;font-family:inherit;}
+input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.1);background:#fff;}
+input::placeholder{color:#94a3b8;}
+select option{background:#fff;color:#1e293b;}
+select optgroup{color:#0891b2;font-weight:700;}
+.abtn{width:100%;padding:13px;border:none;border-radius:12px;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;margin-top:4px;transition:all .25s;}
+.abtn:hover{filter:brightness(1.1);}
+.alink{text-align:center;margin-top:14px;font-size:13px;color:#64748b;}
+.alink span{color:#3b82f6;cursor:pointer;text-decoration:underline;}
+.aback{text-align:center;margin-top:10px;font-size:12px;color:#94a3b8;cursor:pointer;}
+.aback:hover{color:#1e293b;}
+
+/* TOPBAR */
+.topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.tb-left{display:flex;align-items:center;gap:12px;}
+.tb-logo{font-size:16px;font-weight:800;letter-spacing:1px;background:linear-gradient(135deg,#1e293b,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.tb-chip{padding:3px 10px;border-radius:999px;font-size:10px;letter-spacing:2px;}
+.tb-right{display:flex;align-items:center;gap:12px;}
+.tb-user{font-size:13px;color:#64748b;}
+.lobtn{padding:5px 14px;background:transparent;border:1px solid #e2e8f0;border-radius:8px;color:#94a3b8;cursor:pointer;font-size:12px;transition:all .25s;}
+.lobtn:hover{border-color:#ef4444;color:#ef4444;}
+
+/* DASH */
+.dbody{padding:24px;flex:1;position:relative;z-index:1;}
+.dh{font-size:22px;font-weight:800;margin-bottom:4px;color:#1e293b;}
+.ds{font-size:13px;color:#64748b;margin-bottom:22px;}
+.srow{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:22px;}
+.sc{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.sc-l{font-size:10px;letter-spacing:2px;color:#94a3b8;margin-bottom:6px;}
+.sc-v{font-size:26px;font-weight:800;}
+.vb{color:#2563eb;}.vg{color:#16a34a;}.vr{color:#dc2626;}.vy{color:#d97706;}.vc{color:#0891b2;}
+.sect{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:20px;margin-bottom:18px;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.sect-title{font-size:11px;font-weight:700;letter-spacing:3px;color:#0891b2;margin-bottom:16px;}
+.tabs{display:flex;gap:6px;margin-bottom:18px;background:#f1f5f9;padding:5px;border-radius:12px;overflow-x:auto;}
+.tb{padding:8px 16px;border:none;background:transparent;color:#94a3b8;cursor:pointer;border-radius:9px;font-size:13px;transition:all .22s;white-space:nowrap;font-family:inherit;}
+.tb.on{background:#fff;color:#1e293b;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+
+/* PASS CARD */
+.pass-card{background:linear-gradient(135deg,#1e3a8a,#1d4ed8,#0369a1);border-radius:20px;padding:22px;position:relative;overflow:hidden;margin-bottom:18px;box-shadow:0 8px 24px rgba(29,78,216,0.25);}
+.pass-card::after{content:'TGRTC';position:absolute;bottom:-10px;right:16px;font-size:60px;font-weight:900;color:rgba(255,255,255,0.06);letter-spacing:4px;}
+.pch{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.pctag{font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.5);}
+.pcst{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;}
+.st-on{background:rgba(16,185,129,0.25);color:#6ee7b7;border:1px solid rgba(110,231,183,0.4);}
+.st-bl{background:rgba(245,158,11,0.25);color:#fcd34d;border:1px solid rgba(252,211,77,0.4);}
+.st-no{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.2);}
+.pcname{font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:1px;color:#fff;}
+.pcid{font-size:11px;color:rgba(255,255,255,0.55);}
+.pcrow{display:flex;gap:24px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);}
+.pci label{font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;}
+.pci span{font-size:13px;font-weight:600;color:#fff;}
+.pc-photo{width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;flex-shrink:0;}
+
+/* PLANS */
+.planrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.plan{flex:1;min-width:90px;padding:14px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;text-align:center;cursor:pointer;transition:all .25s;}
+.plan:hover,.plan.on{border-color:#3b82f6;background:#eff6ff;}
+.pln{font-size:12px;font-weight:700;margin-bottom:4px;color:#1e293b;}
+.plp{color:#2563eb;font-size:16px;font-weight:800;}
+.plt{font-size:10px;color:#16a34a;margin-top:3px;}
+
+/* BTNS */
+.btn{padding:10px 20px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all .25s;font-family:inherit;}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.bp{background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;}
+.bg{background:linear-gradient(135deg,#059669,#10b981);color:#fff;}
+.bd{background:linear-gradient(135deg,#b91c1c,#ef4444);color:#fff;}
+.bgh{background:transparent;border:1px solid #e2e8f0;color:#64748b;}
+.bfw{width:100%;}
+.brow{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;padding:10px 14px;font-size:10px;letter-spacing:2px;color:#94a3b8;border-bottom:1px solid #e2e8f0;}
+td{padding:12px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#475569;}
+tr:hover td{background:#f8fafc;}
+.te{text-align:center;padding:32px!important;color:#94a3b8!important;font-size:13px!important;}
+
+/* SCAN */
+.scanzone{border:2px dashed #cbd5e1;border-radius:16px;padding:36px;text-align:center;cursor:pointer;background:#f8fafc;transition:all .3s;}
+.scanzone:hover{border-color:#3b82f6;background:#eff6ff;}
+.scanzone.go{border-color:#0891b2;animation:sp .8s ease infinite;}
+@keyframes sp{0%,100%{box-shadow:inset 0 0 0 rgba(8,145,178,0);}50%{box-shadow:inset 0 0 26px rgba(8,145,178,0.08);}}
+.sz-ic{font-size:36px;margin-bottom:10px;}
+.sz-t{font-size:16px;font-weight:700;margin-bottom:6px;color:#1e293b;}
+.sz-h{font-size:11px;letter-spacing:2px;color:#94a3b8;}
+.sres{margin-top:16px;border-radius:12px;padding:16px;display:none;}
+.sres.show{display:block;}
+.sr-v{background:#f0fdf4;border-left:4px solid #16a34a;}
+.sr-e{background:#fffbeb;border-left:4px solid #d97706;}
+.sr-b{background:#fef2f2;border-left:4px solid #dc2626;}
+.sr-i{background:#f8fafc;border-left:4px solid #94a3b8;}
+
+/* MISC */
+.irow{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;}
+.irow .fg{flex:1;min-width:150px;margin-bottom:0;}
+.wbox{padding:14px;border-radius:12px;margin-bottom:16px;background:#fffbeb;border:1px solid #fde68a;}
+.ibox{padding:12px 14px;border-radius:11px;margin-bottom:14px;background:#eff6ff;border:1px solid #bfdbfe;font-size:13px;color:#3730a3;line-height:1.7;}
+.pres{padding:14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:14px;display:none;}
+.pres.show{display:block;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:520px){.g2{grid-template-columns:1fr;}}
+.tbar{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:11px;margin-top:12px;}
+.tbar span:last-child{font-size:18px;font-weight:800;color:#16a34a;}
+.cinfo{padding:14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:14px;display:none;}
+.cinfo.show{display:block;}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:999;align-items:center;justify-content:center;padding:16px;}
+.modal-bg.show{display:flex;}
+.modal{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.12);}
+.modal h3{font-size:18px;font-weight:800;margin-bottom:12px;color:#1e293b;}
+.mbtns{display:flex;gap:12px;justify-content:flex-end;margin-top:20px;}
+@media(max-width:560px){.topbar{padding:10px 14px;}.dbody{padding:14px;}.srow{grid-template-columns:1fr 1fr;}.pcrow{gap:14px;}}
+
+/* PHOTO UPLOAD */
+.photo-upload-area{width:100%;border:2px dashed #cbd5e1;border-radius:14px;padding:20px;text-align:center;cursor:pointer;background:#f8fafc;transition:all .3s;position:relative;overflow:hidden;}
+.photo-upload-area:hover{border-color:#3b82f6;background:#eff6ff;}
+.photo-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:10;}
+.photo-preview{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #3b82f6;display:none;margin:0 auto 8px;position:relative;z-index:1;pointer-events:none;}
+.photo-preview.show{display:block;}
+.photo-placeholder{font-size:40px;margin-bottom:8px;pointer-events:none;}
+.photo-upload-txt{font-size:12px;color:#64748b;pointer-events:none;}
+.photo-upload-hint{font-size:11px;color:#3b82f6;margin-top:4px;pointer-events:none;}
+.photo-change-hint{font-size:11px;color:#16a34a;margin-top:6px;pointer-events:none;display:none;}
+.photo-upload-area.has-photo .photo-change-hint{display:block;}
+.photo-upload-area.has-photo .photo-upload-hint{display:none;}
+
+/* QUICK AMOUNTS */
+.quick-amounts{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.qa-btn{padding:6px 14px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#475569;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;}
+.qa-btn:hover,.qa-btn.sel{border-color:#3b82f6;background:#eff6ff;color:#2563eb;}
+
+/* FARE INFO BOX */
+.fare-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin-bottom:14px;}
+.fare-box-title{font-size:11px;font-weight:700;letter-spacing:2px;color:#16a34a;margin-bottom:8px;}
+.fare-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.fare-item{background:#fff;border:1px solid #d1fae5;border-radius:8px;padding:10px;text-align:center;}
+.fare-km{font-size:18px;font-weight:800;color:#16a34a;}
+.fare-label{font-size:10px;color:#64748b;margin-top:2px;}
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="landing" class="page active">
+  <div class="brand-chip">TELANGANA GOVT</div>
+  <h1 class="hero">TGRTC Smart<br>Bus Pass</h1>
+  <p class="hero-sub">Digital bus pass — tap to verify, recharge online, block instantly.</p>
+  <div class="pgrid">
+    <div class="pcard" id="btnP">
+      <div class="pcard-icon ic-b">🎫</div>
+      <h3>PASSENGER</h3>
+      <p>View pass, recharge online &amp; block lost card</p>
+      <button class="pc-btn pb-b">PASSENGER LOGIN</button>
+    </div>
+    <div class="pcard" id="btnC">
+      <div class="pcard-icon ic-g">🚌</div>
+      <h3>CONDUCTOR</h3>
+      <p>Scan RFID cards, verify &amp; collect cash recharges</p>
+      <button class="pc-btn pb-g">CONDUCTOR LOGIN</button>
+    </div>
+    <div class="pcard" id="btnA">
+      <div class="pcard-icon ic-y">⚙️</div>
+      <h3>ADMIN</h3>
+      <p>Manage passes, conductor reports &amp; controls</p>
+      <button class="pc-btn pb-y">ADMIN LOGIN</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH -->
+<div id="auth" class="page">
+  <div class="abox">
+    <div id="authRole" class="role-chip rc-p">PASSENGER</div>
+    <h2 id="authTitle">Welcome Back</h2>
+    <div id="authSub" class="asub">Login to your account</div>
+    <div id="authAlert" class="alert ae"></div>
+    <div id="LF">
+      <div class="fg"><label>PHONE NUMBER / USERNAME</label><input id="lPh" type="text" placeholder="10-digit phone number"></div>
+      <div class="fg"><label>PASSWORD</label><input id="lPw" type="password" placeholder="Enter your password"></div>
+      <button id="loginBtn" class="abtn">LOGIN →</button>
+      <div id="suRow" class="alink">No account? <span id="goSU">Sign Up</span></div>
+    </div>
+    <div id="SF" style="display:none">
+      <div class="fg" id="photoUploadGroup">
+        <label>PROFILE PHOTO</label>
+        <div class="photo-upload-area" id="photoArea">
+          <input type="file" id="photoInput" accept="image/*">
+          <img id="photoPreview" class="photo-preview" src="" alt="Preview">
+          <div id="photoPlaceholder">
+            <div class="photo-placeholder">📷</div>
+            <div class="photo-upload-txt">Click to upload your photo</div>
+            <div class="photo-upload-hint">JPG, PNG supported</div>
+          </div>
+          <div class="photo-change-hint">✅ Photo selected — click to change</div>
+        </div>
+      </div>
+      <div class="fg"><label>FULL NAME</label><input id="sNm" type="text" placeholder="Full name"></div>
+      <div class="fg"><label>PHONE NUMBER</label><input id="sPh" type="text" placeholder="10-digit phone"></div>
+      <div class="fg" id="condRouteGroup" style="display:none">
+        <label>ASSIGNED ROUTE</label>
+        <select id="sRt">
+          <option value="">-- Select Your Assigned Route --</option>
+          <option value="288D">288D — Mehdipatnam → Chilkur Balaji Temple</option>
+          <option value="505">505 — Mehdipatnam → Shankarpally</option>
+        </select>
+      </div>
+      <div class="fg" id="cidFg" style="display:none"><label>CONDUCTOR STAFF ID</label><input id="sCid" type="text" placeholder="e.g. C-001"></div>
+      <div class="fg"><label>PASSWORD</label><input id="sPw" type="password" placeholder="Min 4 characters"></div>
+      <div class="fg"><label>CONFIRM PASSWORD</label><input id="sCf" type="password" placeholder="Confirm password"></div>
+      <button id="signupBtn" class="abtn">CREATE ACCOUNT →</button>
+      <div class="alink">Already have an account? <span id="goLF">Login</span></div>
+    </div>
+    <div id="backBtn" class="aback">← Back to Portal Selection</div>
+  </div>
+</div>
+
+<!-- PASSENGER DASH -->
+<div id="pDash" class="page">
+  <div class="topbar">
+    <div class="tb-left"><span class="tb-logo">🚌 TGRTC</span><span class="tb-chip rc-p">PASSENGER</span></div>
+    <div class="tb-right"><span class="tb-user" id="pTbU">👤</span><button id="pLo" class="lobtn">LOGOUT</button></div>
+  </div>
+  <div class="dbody">
+    <div class="dh">My Bus Pass</div>
+    <div class="ds">Manage your TGRTC Smart Pass</div>
+    <div class="pass-card">
+      <div class="pch"><div class="pctag">TGRTC SMART BUS PASS</div><div id="pStat" class="pcst st-no">● NOT RECHARGED</div></div>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;">
+        <div id="pcPhoto" class="pc-photo">👤</div>
+        <div>
+          <div id="pNm" class="pcname">PASSENGER NAME</div>
+          <div id="pPid" class="pcid">Pass ID: —</div>
+        </div>
+      </div>
+      <div class="pcrow">
+        <div class="pci"><label>VALID TILL</label><span id="pExp" style="color:rgba(255,255,255,0.5)">Not Recharged</span></div>
+        <div class="pci"><label>PASS TYPE</label><span id="pCt">—</span></div>
+        <div class="pci" id="pRouteCi" style="display:none"><label>ROUTE</label><span id="pRtShow" style="color:#93c5fd">—</span></div>
+        <div class="pci" id="pFareCi" style="display:none"><label>FARE PER TRIP</label><span id="pFareShow" style="color:#6ee7b7">—</span></div>
+        <div class="pci" id="pBalCi"><label>WALLET BALANCE</label><span id="pBalShow" style="color:#6ee7b7">₹0</span></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tb on" id="ptb0">💳 Recharge</button>
+      <button class="tb" id="ptb1">🔒 Block / Unblock</button>
+      <button class="tb" id="ptb2">📋 History</button>
+    </div>
+    <!-- RECHARGE TAB -->
+    <div id="pt0" class="sect">
+      <div class="sect-title">💳 RECHARGE YOUR PASS</div>
+      <div id="pRA" class="alert ae"></div>
+      <div class="tabs" id="rTabBar" style="margin-bottom:16px;">
+        <button class="tb on" id="rTab0">🎫 Buy Day / Monthly Pass</button>
+        <button class="tb" id="rTab1">💰 Top Up Wallet Balance</button>
+      </div>
+      <!-- PLAN PASS -->
+      <div id="rSection0">
+        <div id="pFareInfo" class="fare-box" style="display:none">
+          <div class="fare-box-title">📍 YOUR ROUTE FARE</div>
+          <div class="fare-grid">
+            <div class="fare-item"><div class="fare-km" id="fareKm">—</div><div class="fare-label">km distance</div></div>
+            <div class="fare-item"><div class="fare-km" id="fareCost" style="color:#2563eb">—</div><div class="fare-label">cost per trip @ ₹7/km</div></div>
+          </div>
+        </div>
+        <div class="planrow">
+          <div class="plan" id="pp0"><div class="pln">DAY PASS</div><div class="plp">₹120</div><div class="plt">Single Day</div></div>
+          <div class="plan on" id="pp1"><div class="pln">MONTHLY</div><div class="plp">₹900</div><div class="plt">★ POPULAR</div></div>
+          <div class="plan" id="pp2"><div class="pln">3 MONTHS</div><div class="plp">₹2500</div><div class="plt">Best Value</div></div>
+        </div>
+        <div id="pSP" class="ibox">Selected: <strong>Monthly Pass — ₹900</strong></div>
+        <div class="fg"><label>PAYMENT METHOD</label>
+          <select id="pPm"><option>UPI (GPay / PhonePe / Paytm)</option><option>Debit / Credit Card</option><option>Net Banking</option></select>
+        </div>
+        <button id="pRBtn" class="btn bp bfw">PAY &amp; RECHARGE →</button>
+      </div>
+      <!-- WALLET TOP-UP -->
+      <div id="rSection1" style="display:none">
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#166534;line-height:1.7">
+          💰 <b>Wallet Balance:</b> Charged at <b>₹7 per km</b> per trip on your route. No expiry on wallet balance!
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:14px;">
+          <div style="font-size:11px;letter-spacing:2px;color:#94a3b8;margin-bottom:4px">CURRENT WALLET BALANCE</div>
+          <div id="walletDisp" style="font-size:28px;font-weight:800;color:#16a34a">₹0</div>
+        </div>
+        <div class="fg">
+          <label>QUICK ADD AMOUNTS</label>
+          <div class="quick-amounts" id="qaRow">
+            <button class="qa-btn" data-amt="100">₹100</button>
+            <button class="qa-btn" data-amt="200">₹200</button>
+            <button class="qa-btn" data-amt="500">₹500</button>
+            <button class="qa-btn" data-amt="1000">₹1000</button>
+            <button class="qa-btn" data-amt="2000">₹2000</button>
+          </div>
+        </div>
+        <div class="fg"><label>OR ENTER CUSTOM AMOUNT (₹)</label>
+          <input id="walletAmt" type="number" placeholder="Enter amount e.g. 350" min="10" max="10000">
+        </div>
+        <div class="fg"><label>PAYMENT METHOD</label>
+          <select id="walletPm"><option>UPI (GPay / PhonePe / Paytm)</option><option>Debit / Credit Card</option><option>Net Banking</option></select>
+        </div>
+        <button id="walletBtn" class="btn bg bfw">ADD TO WALLET →</button>
+      </div>
+    </div>
+    <!-- BLOCK TAB -->
+    <div id="pt1" class="sect" style="display:none">
+      <div class="sect-title">🔒 BLOCK / UNBLOCK CARD</div>
+      <div id="pBA" class="alert ae"></div>
+      <div class="wbox"><b style="font-size:13px">⚠️ Lost or Stolen Card?</b><p style="font-size:12px;color:#92400e;margin-top:6px;line-height:1.7">Block it immediately to prevent misuse. You can unblock it later when found.</p></div>
+      <div style="padding:14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:11px;margin-bottom:16px">
+        <div style="font-size:10px;letter-spacing:2px;color:#94a3b8;margin-bottom:6px">CARD STATUS</div>
+        <div id="pCSt" style="font-size:15px;font-weight:700;color:#16a34a">● ACTIVE — Not Blocked</div>
+      </div>
+      <div class="brow">
+        <button id="pBlk" class="btn bd">🔒 BLOCK MY CARD</button>
+        <button id="pUblk" class="btn bg" style="display:none">🔓 UNBLOCK MY CARD</button>
+      </div>
+    </div>
+    <!-- HISTORY TAB -->
+    <div id="pt2" class="sect" style="display:none">
+      <div class="sect-title">📋 RECHARGE HISTORY</div>
+      <table><thead><tr><th>DATE</th><th>PLAN / TYPE</th><th>AMOUNT</th><th>METHOD</th></tr></thead>
+      <tbody id="pHB"><tr><td colspan="4" class="te">No recharges yet</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- CONDUCTOR DASH -->
+<div id="cDash" class="page">
+  <div class="topbar">
+    <div class="tb-left"><span class="tb-logo">🚌 TGRTC</span><span class="tb-chip rc-c">CONDUCTOR</span></div>
+    <div class="tb-right"><span class="tb-user" id="cTbU">🎫</span><button id="cLo" class="lobtn">LOGOUT</button></div>
+  </div>
+  <div class="dbody">
+    <div class="dh">Conductor Portal</div>
+    <div class="ds" id="cRtSub">Route: —</div>
+    <div class="srow">
+      <div class="sc"><div class="sc-l">TODAY SCANS</div><div class="sc-v vb" id="cSc">0</div></div>
+      <div class="sc"><div class="sc-l">VALID</div><div class="sc-v vg" id="cVl">0</div></div>
+      <div class="sc"><div class="sc-l">INVALID</div><div class="sc-v vr" id="cIv">0</div></div>
+      <div class="sc"><div class="sc-l">RECHARGES</div><div class="sc-v vy" id="cRn">0</div></div>
+      <div class="sc"><div class="sc-l">CASH</div><div class="sc-v vc" id="cCa">₹0</div></div>
+    </div>
+    <div class="tabs">
+      <button class="tb on" id="ctb0">📡 Scan &amp; Verify</button>
+      <button class="tb" id="ctb1">💵 Pass Recharge</button>
+      <button class="tb" id="ctb2">💰 Wallet Top-Up</button>
+      <button class="tb" id="ctb3">🔒 Block Card</button>
+      <button class="tb" id="ctb4">📋 History</button>
+    </div>
+    <!-- SCAN TAB -->
+    <div id="ct0">
+      <div class="sect">
+        <div class="sect-title">📡 SCAN RFID CARD</div>
+        <div class="scanzone" id="szBtn"><div class="sz-ic">📶</div><div class="sz-t">TAP HERE TO ACTIVATE DEVICE</div><div class="sz-h" id="szHint">Device is off — tap here to start RFID listening</div></div>
+        <div style="text-align:center;margin:12px 0;font-size:11px;letter-spacing:2px;color:#94a3b8">— OR MANUAL ENTRY —</div>
+        <div class="irow">
+          <div class="fg"><label>PASS ID / PHONE NUMBER</label><input id="cMI" type="text" placeholder="Pass ID or phone number"></div>
+          <button id="cMBtn" class="btn bp" style="height:44px">VERIFY</button>
+        </div>
+        <div id="cSR" class="sres"><div id="cSC"></div></div>
+        <div id="tripRouteBox" style="display:none;margin-top:16px;">
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:16px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#16a34a;margin-bottom:12px;">📍 SELECT TRAVEL ROUTE</div>
+            <div style="margin-bottom:10px;"><label style="font-size:11px;letter-spacing:1px;color:#64748b;margin-bottom:6px;display:block">SOURCE / BOARDING STOP</label><select id="scanSourceStop" style="width:100%;padding:10px 14px;background:#fff;border:1px solid #d1fae5;border-radius:10px;color:#1e293b;font-size:13px;outline:none;"><option value="">-- Select source stop --</option></select></div>
+            <div style="text-align:center;font-size:22px;color:#94a3b8;margin:6px 0;">↓</div>
+            <div style="margin-bottom:12px;"><label style="font-size:11px;letter-spacing:1px;color:#64748b;margin-bottom:6px;display:block">DESTINATION STOP</label><select id="scanDestinationStop" style="width:100%;padding:10px 14px;background:#fff;border:1px solid #d1fae5;border-radius:10px;color:#1e293b;font-size:13px;outline:none;"><option value="">-- Select destination stop --</option></select></div>
+            <div id="scanFareBox" style="display:none;background:#fff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px;"><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;"><div style="text-align:center;flex:1;"><div style="font-size:11px;color:#94a3b8;letter-spacing:1px">DISTANCE</div><div id="scanTripDistance" style="font-size:20px;font-weight:800;color:#1e293b">—</div><div style="font-size:10px;color:#94a3b8">km</div></div><div style="font-size:20px;color:#cbd5e1;">×</div><div style="text-align:center;flex:1;"><div style="font-size:11px;color:#94a3b8;letter-spacing:1px">RATE</div><div style="font-size:20px;font-weight:800;color:#1e293b">₹7</div><div style="font-size:10px;color:#94a3b8">per km</div></div><div style="font-size:20px;color:#cbd5e1;">=</div><div style="text-align:center;flex:1;"><div style="font-size:11px;color:#94a3b8;letter-spacing:1px">FARE</div><div id="scanTripFare" style="font-size:20px;font-weight:800;color:#2563eb">—</div><div style="font-size:10px;color:#94a3b8">per trip</div></div></div></div>
+            <button id="saveTripBtn" class="btn bg bfw" style="margin-top:12px;">🚌 CONFIRM TRIP</button>
+          </div>
+        </div>
+      </div>
+      <div class="sect">
+        <div class="sect-title">📋 RECENT SCANS</div>
+        <table><thead><tr><th>TIME</th><th>NAME</th><th>PASS ID</th><th>STATUS</th></tr></thead>
+        <tbody id="cRB"><tr><td colspan="4" class="te">No scans today</td></tr></tbody></table>
+      </div>
+    </div>
+    <!-- PASS RECHARGE TAB -->
+    <div id="ct1" style="display:none">
+      <div class="sect">
+        <div class="sect-title">💵 CASH RECHARGE FOR PASSENGER</div>
+        <div id="cRA" class="alert ae"></div>
+        <div class="wbox"><p style="font-size:12px;color:#92400e;line-height:1.7">⚠️ <b style="color:#d97706">Important:</b> Collect cash from passenger before recharging. Every transaction is <b style="color:#0891b2">visible to Admin</b>.</p></div>
+        <div class="fg"><label>PASSENGER PHONE NUMBER</label><input id="cPPh" type="text" placeholder="Passenger phone number"></div>
+        <div id="cPR" class="pres">
+          <div style="font-size:10px;letter-spacing:2px;color:#94a3b8;margin-bottom:6px">PASSENGER FOUND</div>
+          <div id="cPN" style="font-weight:700;font-size:15px;color:#1e293b"></div>
+          <div id="cPRt" style="font-size:12px;color:#64748b;margin-top:4px"></div>
+          <div id="cPEx" style="font-size:12px;margin-top:6px"></div>
+        </div>
+        <div class="fg">
+          <label>SELECT PLAN</label>
+          <div class="planrow">
+            <div class="plan" id="cp0"><div class="pln">DAY PASS</div><div class="plp">₹120</div><div class="plt">Single Day</div></div>
+            <div class="plan on" id="cp1"><div class="pln">MONTHLY</div><div class="plp">₹900</div><div class="plt">★ POPULAR</div></div>
+            <div class="plan" id="cp2"><div class="pln">3 MONTHS</div><div class="plp">₹2500</div><div class="plt">Best Value</div></div>
+          </div>
+        </div>
+        <div class="fg"><label>CASH RECEIVED (₹)</label><input id="cCI" type="number" placeholder="Enter cash amount received from passenger"></div>
+        <button id="cRBtn" class="btn bg bfw">✅ CONFIRM RECHARGE &amp; RECORD</button>
+      </div>
+    </div>
+    <!-- CONDUCTOR WALLET TOP-UP WITH BUS STOPS -->
+    <div id="ct2" style="display:none">
+      <div class="sect">
+        <div class="sect-title">💰 WALLET TOP-UP FOR PASSENGER</div>
+        <div id="cWA" class="alert ae"></div>
+        <div class="wbox"><p style="font-size:12px;color:#92400e;line-height:1.7">⚠️ <b style="color:#d97706">Important:</b> Collect cash first. Select FROM &amp; TO stops — fare is auto-calculated at <b style="color:#0891b2">₹7/km</b>. Visible to Admin.</p></div>
+        <div class="fg"><label>PASSENGER PHONE NUMBER</label><input id="cWPh" type="text" placeholder="Passenger phone number"></div>
+        <div id="cWPR" class="pres">
+          <div style="font-size:10px;letter-spacing:2px;color:#94a3b8;margin-bottom:6px">PASSENGER FOUND</div>
+          <div id="cWPN" style="font-weight:700;font-size:15px;color:#1e293b"></div>
+          <div id="cWRtInfo" style="font-size:12px;color:#2563eb;font-weight:600;margin-top:4px"></div>
+          <div id="cWBal" style="font-size:13px;margin-top:6px;color:#16a34a;font-weight:700"></div>
+        </div>
+        <!-- BUS STOP SELECTOR -->
+        <div id="stopSelectorBox" style="display:none">
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:16px;margin-bottom:14px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#16a34a;margin-bottom:12px;">📍 SELECT TRAVEL STOPS</div>
+            <div style="margin-bottom:10px;">
+              <label style="font-size:11px;letter-spacing:1px;color:#64748b;margin-bottom:6px;display:block">FROM STOP</label>
+              <select id="fromStop" style="width:100%;padding:10px 14px;background:#fff;border:1px solid #d1fae5;border-radius:10px;color:#1e293b;font-size:13px;outline:none;">
+                <option value="">-- Select boarding stop --</option>
+              </select>
+            </div>
+            <div style="text-align:center;font-size:22px;color:#94a3b8;margin:6px 0;">↓</div>
+            <div style="margin-bottom:12px;">
+              <label style="font-size:11px;letter-spacing:1px;color:#64748b;margin-bottom:6px;display:block">TO STOP</label>
+              <select id="toStop" style="width:100%;padding:10px 14px;background:#fff;border:1px solid #d1fae5;border-radius:10px;color:#1e293b;font-size:13px;outline:none;">
+                <option value="">-- Select destination stop --</option>
+              </select>
+            </div>
+            <!-- Fare calculation display -->
+            <div id="fareCalcBox" style="display:none;background:#fff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px;">
+              <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+                <div style="text-align:center;flex:1;">
+                  <div style="font-size:11px;color:#94a3b8;letter-spacing:1px">DISTANCE</div>
+                  <div id="fcDist" style="font-size:20px;font-weight:800;color:#1e293b">—</div>
+                  <div style="font-size:10px;color:#94a3b8">km</div>
+                </div>
+                <div style="font-size:20px;color:#cbd5e1;">×</div>
+                <div style="text-align:center;flex:1;">
+                  <div style="font-size:11px;color:#94a3b8;letter-spacing:1px">RATE</div>
+                  <div style="font-size:20px;font-weight:800;color:#1e293b">₹7</div>
+                  <div style="font-size:10px;color:#94a3b8">per km</div>
+                </div>
+                <div style="font-size:20px;color:#cbd5e1;">=</div>
+                <div style="text-align:center;flex:1;">
+                  <div style="font-size:11px;color:#94a3b8;letter-spacing:1px">FARE</div>
+                  <div id="fcFare" style="font-size:20px;font-weight:800;color:#2563eb">—</div>
+                  <div style="font-size:10px;color:#94a3b8">per trip</div>
+                </div>
+              </div>
+              <div id="fcBal" style="margin-top:10px;font-size:12px;color:#475569;text-align:center;padding-top:10px;border-top:1px solid #e2e8f0;"></div>
+              <div id="fcWarn" style="display:none;margin-top:6px;font-size:12px;color:#dc2626;font-weight:600;text-align:center">⚠️ Insufficient wallet balance for this trip!</div>
+            </div>
+          </div>
+          <button id="cWDeduct" class="btn bd bfw" style="margin-bottom:10px">🚌 DEDUCT TRIP FARE FROM WALLET</button>
+          <div style="text-align:center;font-size:11px;color:#94a3b8;margin:8px 0;letter-spacing:2px">— OR TOP UP WALLET —</div>
+          <div class="quick-amounts" id="cqaRow">
+            <button class="qa-btn" data-camt="100">₹100</button>
+            <button class="qa-btn" data-camt="200">₹200</button>
+            <button class="qa-btn" data-camt="500">₹500</button>
+            <button class="qa-btn" data-camt="1000">₹1000</button>
+            <button class="qa-btn" data-camt="2000">₹2000</button>
+          </div>
+          <div class="fg" style="margin-top:8px"><label>CUSTOM AMOUNT (₹)</label><input id="cWCI" type="number" placeholder="Enter any amount e.g. 350" min="10"></div>
+          <button id="cWBtn" class="btn bg bfw">💰 ADD AMOUNT TO WALLET</button>
+        </div>
+      </div>
+    </div>
+    <!-- BLOCK CARD TAB -->
+    <div id="ct3" style="display:none">
+      <div class="sect">
+        <div class="sect-title">🔒 BLOCK / UNBLOCK PASSENGER CARD</div>
+        <div id="cBA" class="alert ae"></div>
+        <div class="wbox"><p style="font-size:12px;color:#92400e;line-height:1.7">⚠️ Use this to immediately block a lost, stolen or fraudulent card. All block actions are <b style="color:#0891b2">visible to Admin</b>.</p></div>
+        <div class="fg"><label>PASSENGER PHONE NUMBER</label><input id="cBPh" type="text" placeholder="Enter passenger phone number"></div>
+        <button id="cBSearch" class="btn bp" style="margin-bottom:14px;width:100%">🔍 FIND PASSENGER</button>
+        <div id="cBPR" class="pres">
+          <div style="font-size:10px;letter-spacing:2px;color:#94a3b8;margin-bottom:8px">PASSENGER FOUND</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <div id="cBPhoto" style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;flex-shrink:0;">?</div>
+            <div>
+              <div id="cBPN" style="font-weight:700;font-size:15px;color:#1e293b"></div>
+              <div id="cBPid" style="font-size:11px;color:#94a3b8;margin-top:2px"></div>
+            </div>
+          </div>
+          <div id="cBSt" style="padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;margin-bottom:12px;"></div>
+          <div style="display:flex;gap:10px;">
+            <button id="cDoBlock" class="btn bd" style="flex:1">🔒 BLOCK CARD</button>
+            <button id="cDoUnblock" class="btn bg" style="flex:1">🔓 UNBLOCK CARD</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- HISTORY TAB -->
+    <div id="ct4" style="display:none">
+      <div class="sect">
+        <div class="sect-title">📋 MY TRANSACTION HISTORY</div>
+        <div class="ibox">ℹ️ All records are visible to Admin — transactions are permanently logged.</div>
+        <table><thead><tr><th>DATE &amp; TIME</th><th>PASSENGER</th><th>TYPE</th><th>CASH</th><th>DETAILS</th></tr></thead>
+        <tbody id="cHB"><tr><td colspan="5" class="te">No transactions yet</td></tr></tbody></table>
+        <div class="tbar"><span>Total Cash Collected:</span><span id="cHT">₹0</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DASH -->
+<div id="aDash" class="page">
+  <div class="topbar">
+    <div class="tb-left"><span class="tb-logo">🚌 TGRTC</span><span class="tb-chip rc-a">ADMIN</span></div>
+    <div class="tb-right"><span class="tb-user">⚙️ Admin</span><button id="aLo" class="lobtn">LOGOUT</button></div>
+  </div>
+  <div class="dbody">
+    <div class="dh">Admin Panel</div>
+    <div class="ds">Manage all passes, conductors &amp; system controls</div>
+    <div class="srow">
+      <div class="sc"><div class="sc-l">TOTAL</div><div class="sc-v vb" id="aT">0</div></div>
+      <div class="sc"><div class="sc-l">ACTIVE</div><div class="sc-v vg" id="aAc">0</div></div>
+      <div class="sc"><div class="sc-l">BLOCKED</div><div class="sc-v vr" id="aBl">0</div></div>
+      <div class="sc"><div class="sc-l">NO PASS</div><div class="sc-v vy" id="aNp">0</div></div>
+    </div>
+    <div class="tabs">
+      <button class="tb on" id="atb0">🎫 All Passes</button>
+      <button class="tb" id="atb1">💵 Conductor Report</button>
+      <button class="tb" id="atb2">➕ Add Pass</button>
+    </div>
+    <div id="at0" class="sect">
+      <div class="sect-title">🎫 ALL PASSENGERS</div>
+      <div id="aPA" class="alert as"></div>
+      <table><thead><tr><th>NAME</th><th>PASS ID</th><th>ROUTE</th><th>EXPIRY</th><th>WALLET</th><th>STATUS</th><th>ACTION</th></tr></thead>
+      <tbody id="aPB"><tr><td colspan="7" class="te">No passengers registered yet</td></tr></tbody></table>
+    </div>
+    <div id="at1" class="sect" style="display:none">
+      <div class="sect-title">💵 CONDUCTOR TRANSACTION REPORT</div>
+      <div id="aCA" class="alert ae"></div>
+      <div class="irow" style="margin-bottom:16px">
+        <div class="fg"><label>CONDUCTOR ID or PHONE</label><input id="aCQ" type="text" placeholder="e.g. C-001 or 9876543210"></div>
+        <button id="aCBtn" class="btn bp" style="height:44px">SEARCH</button>
+      </div>
+      <div id="aCInfo" class="cinfo">
+        <div id="aCNm" style="font-weight:700;font-size:15px;color:#1e293b"></div>
+        <div id="aCRt" style="font-size:12px;color:#64748b;margin-top:4px"></div>
+        <div style="display:flex;gap:24px;margin-top:14px">
+          <div><div class="sc-l">TOTAL TRANSACTIONS</div><div class="sc-v vb" id="aCCnt">0</div></div>
+          <div><div class="sc-l">TOTAL CASH</div><div class="sc-v vg" id="aCTot">₹0</div></div>
+        </div>
+      </div>
+      <table id="aCTbl" style="display:none"><thead><tr><th>DATE &amp; TIME</th><th>PASSENGER</th><th>TYPE</th><th>CASH</th><th>DETAILS</th></tr></thead>
+      <tbody id="aCBody"></tbody></table>
+      <div id="aCEmp" style="text-align:center;padding:28px;color:#94a3b8;font-size:13px">Enter Conductor ID or phone to search</div>
+    </div>
+    <div id="at2" class="sect" style="display:none">
+      <div class="sect-title">➕ ADD NEW PASS</div>
+      <div id="aAA" class="alert as"></div>
+      <div class="g2">
+        <div class="fg"><label>FULL NAME</label><input id="aN" type="text" placeholder="Passenger full name"></div>
+        <div class="fg"><label>PHONE NUMBER</label><input id="aPh" type="text" placeholder="10-digit phone"></div>
+        <div class="fg">
+          <label>ROUTE</label>
+          <select id="aRt">
+            <option value="">-- Select Route --</option>
+            <option value="288D">288D — Mehdipatnam → Chilkur Balaji Temple</option>
+            <option value="505">505 — Mehdipatnam → Shankarpally</option>
+          </select>
+        </div>
+        <div class="fg"><label>PASS TYPE</label><select id="aPl"><option value="day">Day Pass — ₹120</option><option value="month" selected>Monthly — ₹900</option><option value="3month">3 Months — ₹2500</option></select></div>
+        <div class="fg"><label>START DATE</label><input id="aDt" type="date"></div>
+      </div>
+      <button id="aABtn" class="btn bp" style="margin-top:8px">CREATE PASS →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div id="mBlk" class="modal-bg">
+  <div class="modal">
+    <h3>⚠️ Confirm Card Block</h3>
+    <p style="color:#64748b;font-size:13px;line-height:1.7">Once blocked, the card will show as <b style="color:#dc2626">BLOCKED</b> when scanned. You can unblock it anytime.</p>
+    <div class="mbtns"><button id="mBlkNo" class="btn bgh">Cancel</button><button id="mBlkYes" class="btn bd">YES, BLOCK IT</button></div>
+  </div>
+</div>
+<div id="mRch" class="modal-bg">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:44px;margin-bottom:12px">✅</div>
+    <h3>Recharge Successful!</h3>
+    <p style="color:#64748b;font-size:13px;margin-top:6px" id="mRT">Pass recharged.</p>
+    <div style="margin-top:14px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font-size:12px;color:#64748b">New Expiry: <b id="mRE" style="color:#16a34a">—</b></div>
+    <button id="mRDone" class="btn bp bfw" style="margin-top:16px">DONE ✓</button>
+  </div>
+</div>
+
+<!-- Firebase Compat SDK (works directly in HTML, no build tools needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+// ── FIREBASE CONFIG ──
+const firebaseConfig = {
+  apiKey: "AIzaSyDGr0HtOKRNyRIwVNO1FOY6X3CCqCwoiiY",
+  authDomain: "tgrtc-bus-pass-1d337.firebaseapp.com",
+  projectId: "tgrtc-bus-pass-1d337",
+  storageBucket: "tgrtc-bus-pass-1d337.firebasestorage.app",
+  messagingSenderId: "89094829184",
+  appId: "1:89094829184:web:23e68822e9efa934756265"
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
+</script>
+
+<script>
+(function(){
+var FARE_PER_KM = 7;
+var role='passenger', me=null;
+var spv={n:'Monthly Pass',p:900}, scpv={n:'Monthly Pass',p:900};
+var cst={t:0,v:0,i:0}, crst={n:0,tot:0}, blk=false, si=0;
+
+var ROUTE_STOPS = {
+  '288D': {
+    name: 'Mehdipatnam → Chilkur Balaji Temple',
+    stops: [
+      {name:'Mehdipatnam (Start)',       km:0},
+      {name:'Rethibowli',                km:2},
+      {name:'Langar House',              km:4},
+      {name:'Sun City',                  km:7},
+      {name:'Bandlaguda X Road',         km:10},
+      {name:'Kalimandir',                km:13},
+      {name:'PBEL City',                 km:16},
+      {name:'Aziz Nagar',                km:19},
+      {name:'Chilkur Balaji Temple',     km:23}
+    ]
+  },
+  '505': {
+    name: 'Mehdipatnam → Shankarpally',
+    stops: [
+      {name:'Mehdipatnam Bus Station',           km:0},
+      {name:'Rethibowli / Nanal Nagar',          km:2},
+      {name:'Langer Houz',                       km:4},
+      {name:'Bapu Ghat',                         km:6},
+      {name:'Ramdevguda',                        km:8},
+      {name:'Ibrahim Bagh',                      km:10},
+      {name:'Taramathi Baradari',                km:12},
+      {name:'Narsingi / Hanuman Temple',         km:15},
+      {name:'Kokapet X Road',                    km:18},
+      {name:'Gandipet X Road / Ocean Park',      km:21},
+      {name:'C.B.I.T. / C.B.I.T. Hostel',       km:24},
+      {name:'I.B.S. (ICFAI Business School)',    km:27},
+      {name:'Mokila',                            km:30},
+      {name:'Shankarpally Bus Station',          km:34}
+    ]
+  }
+};
+
+function parseRoute(rv){
+  if(!rv) return {no:'',display:'—',km:0};
+  if(ROUTE_STOPS[rv]){
+    var r=ROUTE_STOPS[rv];
+    return {no:rv, display:r.name, km:r.stops[r.stops.length-1].km};
+  }
+  var parts=rv.split('|');
+  return {no:parts[0]||'', display:parts[1]||rv, km:parseInt(parts[2])||0};
+}
+
+// ── DATA FUNCTIONS (Firebase Firestore + localStorage fallback) ──
+
+// Users collection: doc per user key e.g. "9876543210_passenger"
+function gU(cb){
+  db.collection('tgrtc_users').get().then(function(snap){
+    var users={};
+    snap.forEach(function(doc){users[doc.id]=doc.data();});
+    cb(users);
+  }).catch(function(){
+    try{cb(JSON.parse(localStorage.getItem('tgU')||'{}'));}catch(e){cb({});}
+  });
+}
+
+function sUKey(key, data){
+  // Save single user doc to Firestore
+  db.collection('tgrtc_users').doc(key).set(data).catch(function(e){console.warn('Firebase save failed:',e);});
+  // Also keep localStorage as backup
+  try{
+    var u=JSON.parse(localStorage.getItem('tgU')||'{}');
+    u[key]=data;
+    localStorage.setItem('tgU',JSON.stringify(u));
+  }catch(e){}
+}
+
+function gUSync(){
+  // Synchronous localStorage read for immediate UI needs
+  try{return JSON.parse(localStorage.getItem('tgU')||'{}');}catch(e){return{};}
+}
+
+// Conductor history: doc per conductor phone
+function gCH(ph,cb){
+  db.collection('tgrtc_chistory').doc(ph).get().then(function(doc){
+    cb(doc.exists?(doc.data().history||[]):[]);
+  }).catch(function(){
+    try{cb(JSON.parse(localStorage.getItem('ch_'+ph)||'[]'));}catch(e){cb([]);}
+  });
+}
+function sCH(ph,h){
+  db.collection('tgrtc_chistory').doc(ph).set({history:h}).catch(function(e){console.warn(e);});
+  try{localStorage.setItem('ch_'+ph,JSON.stringify(h));}catch(e){}
+}
+function gCHSync(ph){try{return JSON.parse(localStorage.getItem('ch_'+ph)||'[]');}catch(e){return[];}}
+
+// Passenger history
+function gPH(ph,cb){
+  db.collection('tgrtc_phistory').doc(ph).get().then(function(doc){
+    cb(doc.exists?(doc.data().history||[]):[]);
+  }).catch(function(){
+    try{cb(JSON.parse(localStorage.getItem('ph_'+ph)||'[]'));}catch(e){cb([]);}
+  });
+}
+function sPH(ph,h){
+  db.collection('tgrtc_phistory').doc(ph).set({history:h}).catch(function(e){console.warn(e);});
+  try{localStorage.setItem('ph_'+ph,JSON.stringify(h));}catch(e){}
+}
+
+function pg(id, persist){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  var target=document.getElementById(id);
+  if(target) target.classList.add('active');
+  if(persist!==false){
+    try{sessionStorage.setItem('tgCurrentPage',id);}catch(e){}
+  }
+}
+
+// Restore the last visible page after browser refresh. Authentication data is
+// restored from localStorage so dashboard pages can be reconstructed safely.
+function restorePageAfterRefresh(){
+  var saved='';
+  try{saved=sessionStorage.getItem('tgCurrentPage')||'';}catch(e){}
+  if(!saved || saved==='landing') return;
+
+  if(saved==='auth'){
+    var savedRole='';
+    try{savedRole=sessionStorage.getItem('tgRole')||'';}catch(e){}
+    if(savedRole){goA(savedRole);}else{pg('landing',false);}
+    return;
+  }
+
+  if(saved==='aDash'){
+    me={name:'Admin',role:'admin'};
+    loadAdmin();
+    pg('aDash',false);
+    return;
+  }
+
+  if(saved==='pDash' || saved==='cDash'){
+    try{
+      var savedKey=sessionStorage.getItem('tgLoginKey')||'';
+      var users=JSON.parse(localStorage.getItem('tgU')||'{}');
+      var user=users[savedKey];
+      if(user && user.role){
+        me=user;
+        role=user.role;
+        blk=user.blocked||false;
+        if(role==='passenger' && saved==='pDash'){
+          loadPDash(user);
+          pg('pDash',false);
+        }else if(role==='conductor' && saved==='cDash'){
+          cst={t:0,v:0,i:0};crst={n:0,tot:0};
+          el('cTbU').textContent='🎫 '+user.name+' ('+(user.condId||'')+')';
+          var rt=parseRoute(user.route);
+          el('cRtSub').textContent='Route: '+rt.no+' — '+rt.display+' | '+rt.km+' km';
+          loadCHist();setTapUI(false);pg('cDash',false);
+        }
+      }
+    }catch(e){}
+  }
+}
+
+window.addEventListener('DOMContentLoaded',restorePageAfterRefresh);
+function al(id,msg,t){var e=document.getElementById(id);if(!e)return;e.textContent=msg;e.className='alert '+(t==='s'?'as':'ae')+' show';setTimeout(function(){e.classList.remove('show')},3800)}
+function el(id){return document.getElementById(id)}
+
+// ── PHOTO UPLOAD ──
+var photoBase64='';
+(function(){
+  var inp=el('photoInput');
+  if(!inp)return;
+  inp.addEventListener('change',function(){
+    var file=this.files[0];
+    if(!file)return;
+    if(file.size>2*1024*1024){al('authAlert','Photo must be under 2MB!','e');return;}
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      photoBase64=ev.target.result;
+      var prev=el('photoPreview'),ph=el('photoPlaceholder'),area=el('photoArea');
+      prev.src=photoBase64;prev.classList.add('show');
+      if(ph)ph.style.display='none';
+      area.style.borderColor='#10b981';area.classList.add('has-photo');
+    };
+    reader.readAsDataURL(file);
+  });
+})();
+
+// ── LANDING ──
+el('btnP').addEventListener('click',function(){goA('passenger')});
+el('btnC').addEventListener('click',function(){goA('conductor')});
+el('btnA').addEventListener('click',function(){goA('admin')});
+
+function goA(r){
+  role=r;
+  try{sessionStorage.setItem('tgRole',r);}catch(e){}
+  el('authRole').textContent=r.toUpperCase();
+  el('authRole').className='role-chip '+(r==='passenger'?'rc-p':r==='conductor'?'rc-c':'rc-a');
+  ['lPh','lPw','sNm','sPh','sPw','sCf','sCid'].forEach(function(i){var e=el(i);if(e)e.value='';});
+  var sRtEl=el('sRt');if(sRtEl)sRtEl.value='';
+  el('authAlert').className='alert ae';
+  el('LF').style.display='block';el('SF').style.display='none';
+  el('authTitle').textContent='Welcome Back';
+  el('authSub').textContent='Login to your account';
+  el('suRow').style.display=r==='admin'?'none':'block';
+  el('cidFg').style.display=r==='conductor'?'block':'none';
+  el('condRouteGroup').style.display=r==='conductor'?'block':'none';
+  pg('auth');
+}
+
+el('goSU').addEventListener('click',function(){
+  el('LF').style.display='none';el('SF').style.display='block';
+  el('authTitle').textContent='Create Account';
+  el('authSub').textContent='Sign up for TGRTC Smart Pass';
+  el('authAlert').className='alert ae';
+  el('cidFg').style.display=role==='conductor'?'block':'none';
+  el('condRouteGroup').style.display=role==='conductor'?'block':'none';
+});
+el('goLF').addEventListener('click',function(){
+  el('SF').style.display='none';el('LF').style.display='block';
+  el('authTitle').textContent='Welcome Back';
+  el('authSub').textContent='Login to your account';
+  el('authAlert').className='alert ae';
+});
+el('backBtn').addEventListener('click',function(){pg('landing')});
+
+// ── SIGNUP ──
+el('signupBtn').addEventListener('click',function(){
+  var n=el('sNm').value.trim(),ph=el('sPh').value.trim();
+  var rt=role==='conductor'?el('sRt').value:'';
+  var ci=el('sCid').value.trim(),pw=el('sPw').value,cf=el('sCf').value;
+  if(!n||!ph||!pw||!cf){al('authAlert','Please fill all fields!','e');return}
+  if(!/^[0-9]{10}$/.test(ph)){al('authAlert','Enter a valid 10-digit phone number!','e');return}
+  if(role==='conductor'&&!rt){al('authAlert','Please select your assigned route!','e');return}
+  if(role==='conductor'&&!ci){al('authAlert','Please enter your Staff ID!','e');return}
+  if(pw!==cf){al('authAlert','Passwords do not match!','e');return}
+  if(pw.length<4){al('authAlert','Password must be at least 4 characters!','e');return}
+  var key=ph+'_'+role;
+  // Check if account exists in Firebase first
+  db.collection('tgrtc_users').doc(key).get().then(function(doc){
+    if(doc.exists){al('authAlert','An account with this phone already exists!','e');return;}
+    var yr=new Date().getFullYear();
+    // For pass ID uniqueness use timestamp
+    var pid='TGRTC-'+yr+'-'+String(Date.now()).slice(-5);
+    var storedPhoto=role==='passenger'?photoBase64:'';
+    var userData={name:n,phone:ph,password:pw,role:role,route:rt,passId:pid,condId:ci,expiry:null,cardType:null,blocked:false,photo:storedPhoto,walletBalance:0};
+    sUKey(key, userData);
+    al('authAlert','✅ Account created! Please login.','s');
+    photoBase64='';
+    var pv=el('photoPreview');if(pv){pv.src='';pv.classList.remove('show');}
+    var pp=el('photoPlaceholder');if(pp)pp.style.display='block';
+    var pa=el('photoArea');if(pa){pa.style.borderColor='#cbd5e1';pa.classList.remove('has-photo');}
+    setTimeout(function(){
+      el('SF').style.display='none';el('LF').style.display='block';
+      el('authTitle').textContent='Welcome Back';
+      el('authSub').textContent='Login to your account';
+      el('authAlert').className='alert ae';
+    },1600);
+  }).catch(function(){al('authAlert','Connection error. Please try again.','e');});
+});
+
+// ── LOGIN ──
+el('loginBtn').addEventListener('click',doLogin);
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&el('auth').classList.contains('active')){
+    if(el('SF').style.display==='block')el('signupBtn').click();else doLogin();
+  }
+});
+
+function doLogin(){
+  var ph=el('lPh').value.trim(),pw=el('lPw').value;
+  if(!ph||!pw){al('authAlert','Please enter phone & password!','e');return}
+  if(role==='admin'){
+    if(ph==='admin'&&pw==='admin123'){me={name:'Admin',role:'admin'};loadAdmin();pg('aDash')}
+    else al('authAlert','❌ Wrong admin credentials!','e');
+    return;
+  }
+  var key=ph+'_'+role;
+  al('authAlert','Logging in...','s');
+  db.collection('tgrtc_users').doc(key).get().then(function(doc){
+    if(!doc.exists){al('authAlert','No account found. Please Sign Up!','e');return;}
+    var user=doc.data();
+    if(user.password!==pw){al('authAlert','Wrong password!','e');return;}
+    me=user;blk=user.blocked||false;
+    // Sync to localStorage for offline use
+    try{var u=JSON.parse(localStorage.getItem('tgU')||'{}');u[key]=user;localStorage.setItem('tgU',JSON.stringify(u));}catch(e){}
+    if(role==='passenger'){try{sessionStorage.setItem('tgLoginKey',key);}catch(e){};loadPDash(user);pg('pDash');}
+    else{
+      cst={t:0,v:0,i:0};crst={n:0,tot:0};
+      el('cTbU').textContent='🎫 '+user.name+' ('+(user.condId||'')+')';
+      var rt=parseRoute(user.route);
+      el('cRtSub').textContent='Route: '+rt.no+' — '+rt.display+' | '+rt.km+' km';
+      try{sessionStorage.setItem('tgLoginKey',key);}catch(e){};loadCHist();setTapUI(false);pg('cDash');
+    }
+  }).catch(function(){al('authAlert','Connection error. Please try again.','e');});
+}
+
+function logout(){if(role==='conductor' && me) deactivateRFIDDevice();me=null;blk=false;cst={t:0,v:0,i:0};crst={n:0,tot:0};stopHardwareListener();try{sessionStorage.removeItem('tgCurrentPage');sessionStorage.removeItem('tgLoginKey');sessionStorage.removeItem('tgRole');}catch(e){};pg('landing',false)}
+el('pLo').addEventListener('click',logout);
+el('cLo').addEventListener('click',logout);
+el('aLo').addEventListener('click',logout);
+
+// ── PASSENGER DASHBOARD ──
+function loadPDash(u){
+  el('pTbU').textContent='👤 '+u.name;
+  var pcP=el('pcPhoto');
+  if(pcP){
+    if(u.photo&&u.photo.length>10){
+      pcP.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" alt="photo">';
+    } else {
+      pcP.textContent=u.name.charAt(0).toUpperCase();
+    }
+  }
+  el('pNm').textContent=u.name.toUpperCase();
+  el('pPid').textContent='Pass ID: '+u.passId;
+  var bal=u.walletBalance||0;
+  el('pBalShow').textContent='₹'+bal;
+  if(el('walletDisp'))el('walletDisp').textContent='₹'+bal;
+  var rt=parseRoute(u.route);
+  if(u.blocked){
+    setSt('bl');
+    el('pRouteCi').style.display='none';el('pFareCi').style.display='none';el('pBalCi').style.display='block';
+  } else if(u.expiry){
+    setSt('on');
+    el('pExp').textContent=u.expiry;el('pExp').style.color='#6ee7b7';
+    el('pCt').textContent=u.cardType||'—';
+    el('pRouteCi').style.display='block';el('pRtShow').textContent=rt.no+' — '+rt.display;
+    el('pFareCi').style.display='block';
+    var tripCost=rt.km*FARE_PER_KM;
+    el('pFareShow').textContent='₹'+tripCost+' ('+rt.km+'km × ₹'+FARE_PER_KM+')';
+    el('pBalCi').style.display='none';
+    if(el('pFareInfo')){el('pFareInfo').style.display='block';el('fareKm').textContent=rt.km+' km';el('fareCost').textContent='₹'+tripCost;}
+  } else {
+    setSt('no');
+    el('pRouteCi').style.display='none';el('pFareCi').style.display='none';el('pBalCi').style.display='block';
+    if(el('pFareInfo'))el('pFareInfo').style.display='none';
+  }
+  updateBlkUI();loadPHist();
+}
+
+function setSt(s){
+  var e=el('pStat');
+  if(s==='on'){e.textContent='● ACTIVE';e.className='pcst st-on';}
+  else if(s==='bl'){e.textContent='● BLOCKED';e.className='pcst st-bl';}
+  else{e.textContent='● NOT RECHARGED';e.className='pcst st-no';el('pExp').textContent='Not Recharged';el('pExp').style.color='rgba(255,255,255,0.45)';el('pCt').textContent='—';}
+}
+
+[0,1,2].forEach(function(i){
+  el('ptb'+i).addEventListener('click',function(){
+    [0,1,2].forEach(function(j){el('ptb'+j).classList.remove('on');el('pt'+j).style.display='none';});
+    this.classList.add('on');el('pt'+i).style.display='block';
+  });
+});
+
+el('rTab0').addEventListener('click',function(){
+  el('rTab0').classList.add('on');el('rTab1').classList.remove('on');
+  el('rSection0').style.display='block';el('rSection1').style.display='none';
+});
+el('rTab1').addEventListener('click',function(){
+  el('rTab1').classList.add('on');el('rTab0').classList.remove('on');
+  el('rSection1').style.display='block';el('rSection0').style.display='none';
+  el('walletDisp').textContent='₹'+(me?me.walletBalance||0:0);
+});
+
+el('qaRow').addEventListener('click',function(e){
+  var btn=e.target.closest('.qa-btn');if(!btn)return;
+  el('walletAmt').value=btn.dataset.amt;
+  el('qaRow').querySelectorAll('.qa-btn').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel');
+});
+
+var pdata=[[0,'Day Pass',120],[1,'Monthly Pass',900],[2,'3-Month Pass',2500]];
+pdata.forEach(function(d){
+  el('pp'+d[0]).addEventListener('click',function(){
+    pdata.forEach(function(x){el('pp'+x[0]).classList.remove('on');});
+    this.classList.add('on');spv={n:d[1],p:d[2]};
+    el('pSP').innerHTML='Selected: <strong>'+d[1]+' — ₹'+d[2]+'</strong>';
+  });
+});
+
+el('pRBtn').addEventListener('click',function(){
+  var btn=this;btn.textContent='Processing...';btn.disabled=true;
+  setTimeout(function(){
+    btn.textContent='PAY & RECHARGE →';btn.disabled=false;
+    var m=spv.n==='Day Pass'?0:spv.n==='Monthly Pass'?1:3;
+    var d=new Date();
+    if(m===0){d.setDate(d.getDate()+1);}else{d.setMonth(d.getMonth()+m);}
+    var exp=d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    el('pExp').textContent=exp;el('pExp').style.color='#6ee7b7';
+    el('pCt').textContent=spv.n+' Pass';setSt('on');
+    var rt=parseRoute(me?me.route:'');
+    el('pRouteCi').style.display='block';el('pRtShow').textContent=rt.no+' — '+rt.display;
+    el('pFareCi').style.display='block';
+    var tripCost=rt.km*FARE_PER_KM;
+    el('pFareShow').textContent='₹'+tripCost+' ('+rt.km+'km × ₹'+FARE_PER_KM+')';
+    el('pBalCi').style.display='none';
+    if(el('pFareInfo')){el('pFareInfo').style.display='block';el('fareKm').textContent=rt.km+' km';el('fareCost').textContent='₹'+tripCost;}
+    if(me){
+      var key=me.phone+'_passenger';
+      me.expiry=exp;me.cardType=spv.n+' Pass';
+      sUKey(key, me);
+      gPH(me.phone,function(h){
+        h.unshift({dt:new Date().toLocaleDateString('en-IN'),pl:spv.n,am:'₹'+spv.p,mt:el('pPm').value});
+        sPH(me.phone,h);loadPHist();
+      });
+    }
+    el('mRT').textContent='Pass recharged for '+spv.n+' via '+el('pPm').value+'.';
+    el('mRE').textContent=exp;el('mRch').classList.add('show');
+  },1200);
+});
+
+el('walletBtn').addEventListener('click',function(){
+  var amt=parseInt(el('walletAmt').value)||0;
+  if(amt<10){al('pRA','Minimum top-up is ₹10!','e');return}
+  if(amt>10000){al('pRA','Maximum per transaction is ₹10,000!','e');return}
+  var btn=this;btn.textContent='Processing...';btn.disabled=true;
+  setTimeout(function(){
+    btn.textContent='ADD TO WALLET →';btn.disabled=false;
+    if(me){
+      var key=me.phone+'_passenger';
+      me.walletBalance=(me.walletBalance||0)+amt;
+      sUKey(key, me);
+      el('pBalShow').textContent='₹'+me.walletBalance;
+      el('walletDisp').textContent='₹'+me.walletBalance;
+      gPH(me.phone,function(h){
+        h.unshift({dt:new Date().toLocaleDateString('en-IN'),pl:'Wallet Top-Up',am:'₹'+amt,mt:el('walletPm').value});
+        sPH(me.phone,h);loadPHist();
+      });
+    }
+    el('walletAmt').value='';
+    el('qaRow').querySelectorAll('.qa-btn').forEach(function(b){b.classList.remove('sel');});
+    al('pRA','✅ ₹'+amt+' added! Balance: ₹'+(me?me.walletBalance:0),'s');
+  },1000);
+});
+
+function loadPHist(){
+  if(!me)return;
+  gPH(me.phone,function(h){
+    var tb=el('pHB');if(!tb)return;
+    if(!h.length){tb.innerHTML='<tr><td colspan="4" class="te">No transactions yet</td></tr>';return}
+    tb.innerHTML='';
+    h.forEach(function(r){
+      var tr=document.createElement('tr');
+      if(r.type==='Trip'){
+        tr.innerHTML='<td>'+r.dt+'</td><td>🎫 <strong>'+('Ticket '+(r.ticketId||'Trip Ticket'))+'</strong><br><span style="font-size:11px;color:#2563eb;font-weight:700">🚌 Route '+(r.routeNo||parseRoute(me.route||'').no||'—')+'</span><br><span style="font-size:11px;color:#64748b">'+(r.source||'')+' → '+(r.destination||'')+'<br>'+((r.distance||0)+' km')+' • '+(r.status||'Confirmed')+'</span></td><td style="color:#16a34a;font-weight:700">₹'+(r.fare||r.am||0)+'</td><td><span style="color:#16a34a;font-weight:700">Ticket</span></td>';
+      }else{
+        tr.innerHTML='<td>'+r.dt+'</td><td>'+r.pl+'</td><td style="color:#16a34a;font-weight:700">'+r.am+'</td><td>'+(r.mt||'Recharge')+'</td>';
+      }
+      tb.appendChild(tr);
+    });
+  });
+}
+
+function updateBlkUI(){
+  var cs=el('pCSt'),bb=el('pBlk'),ub=el('pUblk');
+  if(blk){cs.textContent='🔴 BLOCKED';cs.style.color='#dc2626';bb.style.display='none';ub.style.display='inline-flex';}
+  else{cs.textContent='● ACTIVE — Not Blocked';cs.style.color='#16a34a';bb.style.display='inline-flex';ub.style.display='none';}
+}
+el('pBlk').addEventListener('click',function(){el('mBlk').classList.add('show');});
+el('pUblk').addEventListener('click',function(){
+  blk=false;
+  if(me){me.blocked=false;sUKey(me.phone+'_passenger',me);}
+  if(me&&me.expiry){setSt('on');el('pRouteCi').style.display='block';el('pFareCi').style.display='block';el('pBalCi').style.display='none';}
+  else{setSt('no');el('pRouteCi').style.display='none';el('pFareCi').style.display='none';el('pBalCi').style.display='block';}
+  updateBlkUI();al('pBA','🔓 Card unblocked!','s');
+});
+el('mBlkNo').addEventListener('click',function(){el('mBlk').classList.remove('show');});
+el('mBlkYes').addEventListener('click',function(){
+  blk=true;
+  if(me){me.blocked=true;sUKey(me.phone+'_passenger',me);}
+  setSt('bl');updateBlkUI();el('mBlk').classList.remove('show');al('pBA','🔒 Card blocked!','e');
+});
+el('mRDone').addEventListener('click',function(){el('mRch').classList.remove('show');});
+
+// ── HARDWARE RFID LISTENER / DEVICE CONTROL ──
+var hwUnsubscribe = null;
+var hwLastSeen = '';
+var hwActive = false;
+
+function setTapUI(active, message){
+  hwActive = active;
+  var z = el('szBtn');
+  var hint = el('szHint');
+  if(active){
+    z.classList.add('go');
+    z.querySelector('.sz-t').textContent = 'DEVICE ACTIVE — TAP RFID CARD';
+    hint.textContent = message || 'RFID device active — waiting for card…';
+  }else{
+    z.classList.remove('go');
+    z.querySelector('.sz-t').textContent = 'TAP HERE TO ACTIVATE DEVICE';
+    hint.textContent = message || 'Device is off — tap here to start RFID listening';
+  }
+}
+
+function setDeviceControl(active){
+  var conductorId = me && me.condId ? String(me.condId) : 'L-009';
+  return db.collection('tgrtc_device_control').doc(conductorId).set({
+    active: !!active,
+    conductorId: conductorId,
+    route: me && me.route ? me.route : '288D',
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, {merge:true});
+}
+
+function startHardwareListener(){
+  stopHardwareListener();
+  hwLastSeen = '';
+  hwUnsubscribe = db.collection('tgrtc_scan_events')
+    .orderBy('ts', 'desc')
+    .limit(1)
+    .onSnapshot(function(snap){
+      if(snap.empty || !hwActive) return;
+      var doc = snap.docs[0];
+      var ev = doc.data();
+      if(doc.id === hwLastSeen) return;
+      hwLastSeen = doc.id;
+
+      // Ignore events belonging to another conductor/device.
+      var eventCid = String(ev.conductorId || '');
+      var myCid = String(me && me.condId || '');
+      if(eventCid && myCid && eventCid !== myCid) return;
+
+      var z = el('szBtn');
+      z.classList.add('go');
+      setTimeout(function(){ z.classList.remove('go'); }, 800);
+
+      var uid = ev.uid || '';
+      var phone = ev.phone || '';
+      var status = String(ev.status || '').toLowerCase();
+
+      if(!phone || status === 'unknown' || status === 'nopass' || status === 'not registered'){
+        showSR({t:'inv'});
+        return;
+      }
+
+      db.collection('tgrtc_users').doc(phone+'_passenger').get().then(function(pdoc){
+        if(!pdoc.exists){ showSR({t:'inv'}); return; }
+        showSR({t:'ok', p:pdoc.data()});
+      }).catch(function(){ showSR({t:'inv'}); });
+    }, function(err){
+      console.warn('Hardware listener error:', err);
+      setTapUI(false, 'Connection error — tap to try again');
+    });
+}
+
+function stopHardwareListener(){
+  if(hwUnsubscribe){ hwUnsubscribe(); hwUnsubscribe=null; }
+  hwLastSeen='';
+}
+
+function deactivateRFIDDevice(){
+  setDeviceControl(false).catch(function(err){ console.warn('Device deactivation error:', err); });
+  stopHardwareListener();
+  setTapUI(false);
+}
+
+function activateRFIDDevice(){
+  setDeviceControl(true).then(function(){
+    setTapUI(true);
+    startHardwareListener();
+  }).catch(function(err){
+    console.warn('Device activation error:', err);
+    setTapUI(false, 'Could not activate device — check Firebase connection');
+  });
+}
+
+// ── CONDUCTOR TABS ──
+[0,1,2,3,4].forEach(function(i){
+  el('ctb'+i).addEventListener('click',function(){
+    [0,1,2,3,4].forEach(function(j){el('ctb'+j).classList.remove('on');el('ct'+j).style.display='none';});
+    this.classList.add('on');el('ct'+i).style.display='block';
+    if(i===4)loadCHist();
+  });
+});
+
+el('szBtn').addEventListener('click',function(){
+  if(hwActive) deactivateRFIDDevice();
+  else activateRFIDDevice();
+});
+el('cMBtn').addEventListener('click',function(){
+  var q=el('cMI').value.trim();if(!q)return;
+  gU(function(u){
+    var f=null;
+    Object.values(u).forEach(function(x){if(x.role==='passenger'&&(x.phone===q||x.passId===q))f=x;});
+    if(f)showSR({t:'ok',p:f});else showSR({t:'inv'});
+  });
+});
+
+function showSR(d){
+  el('tripRouteBox').style.display='none';
+  currentTripPassenger=null;
+  cst.t++;el('cSc').textContent=cst.t;
+  var cls='',html='',stxt='';
+  if(d.t==='inv'){
+    cst.i++;cls='sr-i';
+    html='<div style="color:#64748b;font-weight:700;margin-bottom:6px">❌ INVALID CARD</div><p style="font-size:12px;color:#94a3b8">Not registered in system.</p>';
+    stxt='❌ Invalid';
+  } else {
+    var p=d.p;
+    currentTripPassenger=p;
+    if(p.blocked){
+      cst.i++;cls='sr-b';
+      var rt=parseRoute(p.route);
+      html='<div style="color:#dc2626;font-weight:700;margin-bottom:8px">⛔ CARD BLOCKED</div><div style="font-weight:700;color:#1e293b">'+p.name+'</div><div style="font-size:12px;color:#64748b;margin-top:4px">'+rt.display+'</div>';
+      stxt='⛔ Blocked';
+    } else if(!p.expiry){
+      cst.i++;cls='sr-e';
+      var rt=parseRoute(p.route);
+      html='<div style="color:#d97706;font-weight:700;margin-bottom:8px">⚠️ NOT RECHARGED</div><div style="font-weight:700;color:#1e293b">'+p.name+'</div><div style="font-size:12px;color:#64748b;margin-top:4px">'+rt.display+'</div>';
+      stxt='⚠️ Not Recharged';
+    } else {
+      var ms={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+      var pts=p.expiry.split(' ');
+      var ed=pts.length===3?new Date(parseInt(pts[2]),ms[pts[1]]||0,parseInt(pts[0])):null;
+      if(ed&&ed<new Date()){
+        cst.i++;cls='sr-e';
+        var rt=parseRoute(p.route);
+        html='<div style="color:#d97706;font-weight:700;margin-bottom:8px">⚠️ PASS EXPIRED</div><div style="font-weight:700;color:#1e293b">'+p.name+'</div><div style="font-size:12px;color:#64748b;margin-top:4px">'+rt.display+'</div><div style="color:#dc2626;font-size:12px;margin-top:4px">Expired: '+p.expiry+'</div>';
+        stxt='⚠️ Expired';
+      } else {
+        cst.v++;cls='sr-v';
+        var rt=parseRoute(p.route);
+        var tripCost=rt.km*FARE_PER_KM;
+        var photoHtml=p.photo&&p.photo.length>10
+          ?'<img src="'+p.photo+'" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:3px solid #16a34a;flex-shrink:0;" alt="photo">'
+          :'<div style="width:60px;height:60px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;color:#fff;flex-shrink:0">'+p.name.charAt(0)+'</div>';
+        html='<div style="color:#16a34a;font-weight:700;margin-bottom:10px;font-size:15px">✅ VALID PASS</div>'
+          +'<div style="display:flex;gap:14px;align-items:center;margin-bottom:12px">'+photoHtml
+          +'<div><div style="font-weight:700;font-size:16px;color:#1e293b">'+p.name+'</div>'
+          +'<div style="font-size:12px;color:#64748b;margin-top:2px">📱 '+p.phone+'</div>'
+          +'<div style="font-size:12px;color:#2563eb;margin-top:2px;font-weight:600">💰 Wallet: ₹'+(p.walletBalance||0)+'</div>'
+          +'</div></div>'
+          +'<div style="display:flex;gap:16px;flex-wrap:wrap">'
+          +'<div><div style="font-size:10px;letter-spacing:2px;color:#94a3b8">PASS ID</div><div style="font-size:13px;font-weight:600;color:#1e293b">'+p.passId+'</div></div>'
+          +'<div><div style="font-size:10px;letter-spacing:2px;color:#94a3b8">ROUTE</div><div style="font-size:13px;font-weight:600;color:#1e293b">'+rt.no+' — '+rt.display+'</div></div>'
+          +'<div><div style="font-size:10px;letter-spacing:2px;color:#94a3b8">VALID TILL</div><div style="font-size:13px;font-weight:600;color:#16a34a">'+p.expiry+'</div></div>'
+          +'<div><div style="font-size:10px;letter-spacing:2px;color:#94a3b8">FARE/TRIP</div><div style="font-size:13px;font-weight:600;color:#2563eb">₹'+tripCost+'</div></div>'
+          +'</div>';
+        el('tripRouteBox').style.display='block';
+        populateScanStops(p.route);
+        stxt='✅ Valid';
+      }
+    }
+  }
+  el('cVl').textContent=cst.v;el('cIv').textContent=cst.i;
+  var sr=el('cSR');sr.className='sres show '+cls;el('cSC').innerHTML=html;
+  var tb=el('cRB');if(tb.querySelector('.te'))tb.innerHTML='';
+  var tr=document.createElement('tr'),t=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  tr.innerHTML='<td style="font-size:11px">'+t+'</td><td>'+(d.p?d.p.name:'Unknown')+'</td><td style="font-size:11px">'+(d.p?d.p.passId:'—')+'</td><td>'+stxt+'</td>';
+  tb.insertBefore(tr,tb.firstChild);
+}
+
+// ── SCAN TRIP SOURCE / DESTINATION ──
+var currentTripPassenger=null;
+function populateScanStops(routeKey){var rd=ROUTE_STOPS[routeKey];if(!rd&&routeKey){var routeNo=String(routeKey).split('|')[0];rd=ROUTE_STOPS[routeNo];}if(!rd){rd=ROUTE_STOPS['288D'];}var source=el('scanSourceStop'),destination=el('scanDestinationStop');source.innerHTML='<option value="">-- Select source stop --</option>';destination.innerHTML='<option value="">-- Select destination stop --</option>';if(!rd){el('tripRouteBox').style.display='none';return;}rd.stops.forEach(function(st){var a=document.createElement('option');a.value=st.km;a.textContent=st.name+' ('+st.km+' km)';source.appendChild(a);var b=document.createElement('option');b.value=st.km;b.textContent=st.name+' ('+st.km+' km)';destination.appendChild(b);});el('scanFareBox').style.display='none';el('saveTripBtn').disabled=true;}
+function calculateScanTripFare(){var f=parseInt(el('scanSourceStop').value),t=parseInt(el('scanDestinationStop').value);if(isNaN(f)||isNaN(t)){el('scanFareBox').style.display='none';el('saveTripBtn').disabled=true;return;}if(t<=f){alert('Destination must be after source stop!');el('scanFareBox').style.display='none';el('saveTripBtn').disabled=true;return;}var dist=t-f,fare=dist*FARE_PER_KM;el('scanTripDistance').textContent=dist;el('scanTripFare').textContent='₹'+fare;el('scanFareBox').style.display='block';el('saveTripBtn').disabled=false;}
+el('scanSourceStop').addEventListener('change',calculateScanTripFare);el('scanDestinationStop').addEventListener('change',calculateScanTripFare);
+el('saveTripBtn').addEventListener('click',function(){if(!currentTripPassenger){alert('Please verify a passenger first!');return;}var ss=el('scanSourceStop'),ds=el('scanDestinationStop');if(!ss.value||!ds.value){alert('Please select source and destination!');return;}var f=parseInt(ss.value),t=parseInt(ds.value);if(t<=f){alert('Destination must be after source!');return;}var dist=t-f,fare=dist*FARE_PER_KM,sourceName=ss.options[ss.selectedIndex].textContent.split(' (')[0],destinationName=ds.options[ds.selectedIndex].textContent.split(' (')[0];var passengerRoute=parseRoute(currentTripPassenger.route||'');var tripRecord={dt:new Date().toLocaleString('en-IN'),pid:currentTripPassenger.passId,nm:currentTripPassenger.name,type:'Trip',pl:'Trip: '+sourceName+' → '+destinationName,source:sourceName,destination:destinationName,distance:dist,am:fare,fare:fare,cid:me.condId,status:'Confirmed',ticketId:'TKT-'+Date.now().toString().slice(-8),routeNo:passengerRoute.no,routeName:passengerRoute.display};gCH(me.phone,function(h){h.unshift(tripRecord);sCH(me.phone,h);loadCHist();});var passengerPhone=currentTripPassenger.phone||currentTripPassenger.passengerPhone||'';if(passengerPhone){gPH(passengerPhone,function(h){h.unshift(tripRecord);sPH(passengerPhone,h);if(role==='passenger'&&me&&me.phone===passengerPhone)loadPHist();});}alert('✅ Trip Confirmed!\n\nTicket: '+tripRecord.ticketId+'\nRoute: '+tripRecord.routeNo+'\nPassenger: '+currentTripPassenger.name+'\nSource: '+sourceName+'\nDestination: '+destinationName+'\nDistance: '+dist+' km\nFare: ₹'+fare);});
+
+// ── CONDUCTOR PASS RECHARGE ──
+var cpdata=[[0,'Day Pass',120],[1,'Monthly Pass',900],[2,'3-Month Pass',2500]];
+cpdata.forEach(function(d){
+  el('cp'+d[0]).addEventListener('click',function(){
+    cpdata.forEach(function(x){el('cp'+x[0]).classList.remove('on');});
+    this.classList.add('on');scpv={n:d[1],p:d[2]};
+  });
+});
+
+el('cPPh').addEventListener('blur',searchCP);
+el('cPPh').addEventListener('keyup',function(e){if(e.key==='Enter')searchCP();});
+function searchCP(){
+  var q=el('cPPh').value.trim();if(!q)return;
+  var key=q+'_passenger';
+  db.collection('tgrtc_users').doc(key).get().then(function(doc){
+    var box=el('cPR');
+    if(doc.exists){
+      var f=doc.data();
+      var rt=parseRoute(f.route);
+      el('cPN').textContent='👤 '+f.name+' ('+f.passId+')';
+      el('cPRt').textContent='🛣️ '+rt.no+' — '+rt.display;
+      el('cPEx').innerHTML=f.expiry?'📅 Expiry: <span style="color:#d97706">'+f.expiry+'</span>':'<span style="color:#dc2626">⚠️ Not Recharged</span>';
+      box.dataset.ph=f.phone;box.dataset.pid=f.passId;box.dataset.nm=f.name;
+      box.classList.add('show');
+    } else {
+      al('cRA','❌ Passenger not found!','e');box.classList.remove('show');
+    }
+  }).catch(function(){al('cRA','Connection error!','e');});
+}
+
+el('cRBtn').addEventListener('click',function(){
+  var box=el('cPR');
+  if(!box.classList.contains('show')){al('cRA','Search for a passenger first!','e');return}
+  var cash=parseInt(el('cCI').value)||0;
+  if(cash<scpv.p){al('cRA','Cash must be at least ₹'+scpv.p+'!','e');return}
+  var ph=box.dataset.ph,pid=box.dataset.pid,nm=box.dataset.nm;
+  var mo=scpv.n==='Day Pass'?0:scpv.n==='Monthly Pass'?1:3;
+  var d=new Date();if(mo===0){d.setDate(d.getDate()+1);}else{d.setMonth(d.getMonth()+mo);}
+  var exp=d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  var key=ph+'_passenger';
+  db.collection('tgrtc_users').doc(key).update({expiry:exp,cardType:scpv.n+' Pass'}).then(function(){
+    try{var u=JSON.parse(localStorage.getItem('tgU')||'{}');if(u[key]){u[key].expiry=exp;u[key].cardType=scpv.n+' Pass';localStorage.setItem('tgU',JSON.stringify(u));}}catch(e){}
+  });
+  gCH(me.phone,function(h){
+    h.unshift({dt:new Date().toLocaleString('en-IN'),pid:pid,nm:nm,type:'Pass',pl:scpv.n,am:scpv.p,cash:cash,exp:exp,cid:me.condId});
+    sCH(me.phone,h);
+  });
+  crst.n++;crst.tot+=scpv.p;
+  el('cRn').textContent=crst.n;el('cCa').textContent='₹'+crst.tot;
+  al('cRA','✅ '+nm+' recharged! Expiry: '+exp,'s');
+  el('cPPh').value='';el('cCI').value='';box.classList.remove('show');
+  loadCHist();
+});
+
+// ── CONDUCTOR WALLET TOP-UP WITH BUS STOPS ──
+var cWPassenger=null;
+
+el('cWPh').addEventListener('blur',searchCW);
+el('cWPh').addEventListener('keyup',function(e){if(e.key==='Enter')searchCW();});
+
+function searchCW(){
+  var q=el('cWPh').value.trim();if(!q)return;
+  var box=el('cWPR');
+  el('stopSelectorBox').style.display='none';
+  el('fareCalcBox').style.display='none';
+  db.collection('tgrtc_users').doc(q+'_passenger').get().then(function(doc){
+    if(doc.exists){
+      var f=doc.data();
+      cWPassenger=f;
+      el('cWPN').textContent='👤 '+f.name+' ('+f.passId+')';
+      var rt=parseRoute(f.route);
+      el('cWRtInfo').textContent='🛣️ Route '+rt.no+' — '+rt.display;
+      el('cWBal').textContent='💰 Wallet Balance: ₹'+(f.walletBalance||0);
+      box.dataset.ph=f.phone;box.dataset.pid=f.passId;box.dataset.nm=f.name;
+      box.classList.add('show');
+      populateStops(f.route);
+      el('stopSelectorBox').style.display='block';
+    } else {
+      cWPassenger=null;
+      al('cWA','❌ Passenger not found!','e');box.classList.remove('show');
+    }
+  }).catch(function(){al('cWA','Connection error!','e');});
+}
+
+function populateStops(routeKey){
+  var rd=ROUTE_STOPS[routeKey];
+  var fromSel=el('fromStop'),toSel=el('toStop');
+  fromSel.innerHTML='<option value="">-- Select boarding stop --</option>';
+  toSel.innerHTML='<option value="">-- Select destination stop --</option>';
+  if(!rd){return;}
+  rd.stops.forEach(function(s){
+    var o1=document.createElement('option');o1.value=s.km;o1.textContent=s.name+' ('+s.km+' km)';fromSel.appendChild(o1);
+    var o2=document.createElement('option');o2.value=s.km;o2.textContent=s.name+' ('+s.km+' km)';toSel.appendChild(o2);
+  });
+  el('fareCalcBox').style.display='none';
+  el('cWDeduct').disabled=true;
+}
+
+function calcFare(){
+  var fromKm=parseInt(el('fromStop').value)||0;
+  var toKm=parseInt(el('toStop').value)||0;
+  if(!el('fromStop').value||!el('toStop').value){el('fareCalcBox').style.display='none';el('cWDeduct').disabled=true;return;}
+  if(toKm<=fromKm){al('cWA','Destination must be after boarding stop!','e');el('fareCalcBox').style.display='none';el('cWDeduct').disabled=true;return;}
+  var dist=toKm-fromKm;
+  var fare=dist*FARE_PER_KM;
+  var bal=cWPassenger?cWPassenger.walletBalance||0:0;
+  el('fcDist').textContent=dist;
+  el('fcFare').textContent='₹'+fare;
+  el('fcBal').textContent='Passenger wallet: ₹'+bal+(bal>=fare?' ✅ Sufficient':' ❌ Insufficient');
+  el('fcWarn').style.display=bal<fare?'block':'none';
+  el('fareCalcBox').style.display='block';
+  el('cWDeduct').disabled=bal<fare;
+}
+el('fromStop').addEventListener('change',calcFare);
+el('toStop').addEventListener('change',calcFare);
+
+el('cWDeduct').addEventListener('click',function(){
+  if(!cWPassenger){al('cWA','Search for a passenger first!','e');return;}
+  var fromKm=parseInt(el('fromStop').value)||0;
+  var toKm=parseInt(el('toStop').value)||0;
+  if(!el('fromStop').value||!el('toStop').value||toKm<=fromKm){al('cWA','Select valid FROM and TO stops!','e');return;}
+  var dist=toKm-fromKm;var fare=dist*FARE_PER_KM;
+  var box=el('cWPR');
+  var ph=box.dataset.ph,pid=box.dataset.pid,nm=box.dataset.nm;
+  if((cWPassenger.walletBalance||0)<fare){al('cWA','Insufficient wallet balance!','e');return;}
+  var fromName=el('fromStop').options[el('fromStop').selectedIndex].textContent.split(' (')[0];
+  var toName=el('toStop').options[el('toStop').selectedIndex].textContent.split(' (')[0];
+  cWPassenger.walletBalance=(cWPassenger.walletBalance||0)-fare;
+  var newBal=cWPassenger.walletBalance;
+  db.collection('tgrtc_users').doc(ph+'_passenger').update({walletBalance:newBal});
+  try{var u=JSON.parse(localStorage.getItem('tgU')||'{}');if(u[ph+'_passenger']){u[ph+'_passenger'].walletBalance=newBal;localStorage.setItem('tgU',JSON.stringify(u));}}catch(e){}
+  gCH(me.phone,function(h){
+    h.unshift({dt:new Date().toLocaleString('en-IN'),pid:pid,nm:nm,type:'Deduct',pl:'Trip: '+fromName+' → '+toName,am:fare,cash:fare,exp:'Bal: ₹'+newBal,cid:me.condId});
+    sCH(me.phone,h);
+  });
+  crst.n++;crst.tot+=fare;
+  el('cRn').textContent=crst.n;el('cCa').textContent='₹'+crst.tot;
+  el('cWBal').textContent='💰 Wallet Balance: ₹'+newBal;
+  el('fcBal').textContent='Passenger wallet: ₹'+newBal;
+  el('fcWarn').style.display='none';el('cWDeduct').disabled=true;
+  al('cWA','✅ ₹'+fare+' deducted for '+dist+'km ('+fromName+' → '+toName+'). Balance: ₹'+newBal,'s');
+  loadCHist();
+});
+
+el('cqaRow').addEventListener('click',function(e){
+  var btn=e.target.closest('.qa-btn');if(!btn)return;
+  el('cWCI').value=btn.dataset.camt;
+  el('cqaRow').querySelectorAll('.qa-btn').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel');
+});
+
+el('cWBtn').addEventListener('click',function(){
+  var box=el('cWPR');
+  if(!box.classList.contains('show')){al('cWA','Search for a passenger first!','e');return;}
+  var amt=parseInt(el('cWCI').value)||0;
+  if(amt<10){al('cWA','Minimum top-up is ₹10!','e');return;}
+  var ph=box.dataset.ph,pid=box.dataset.pid,nm=box.dataset.nm;
+  if(!cWPassenger){al('cWA','Passenger not found!','e');return;}
+  cWPassenger.walletBalance=(cWPassenger.walletBalance||0)+amt;
+  var newBal=cWPassenger.walletBalance;
+  db.collection('tgrtc_users').doc(ph+'_passenger').update({walletBalance:newBal});
+  try{var u=JSON.parse(localStorage.getItem('tgU')||'{}');if(u[ph+'_passenger']){u[ph+'_passenger'].walletBalance=newBal;localStorage.setItem('tgU',JSON.stringify(u));}}catch(e){}
+  gCH(me.phone,function(h){
+    h.unshift({dt:new Date().toLocaleString('en-IN'),pid:pid,nm:nm,type:'Wallet',pl:'Wallet Top-Up',am:amt,cash:amt,exp:'Bal: ₹'+newBal,cid:me.condId});
+    sCH(me.phone,h);
+  });
+  crst.n++;crst.tot+=amt;
+  el('cRn').textContent=crst.n;el('cCa').textContent='₹'+crst.tot;
+  el('cWBal').textContent='💰 Wallet Balance: ₹'+newBal;
+  al('cWA','✅ ₹'+amt+" added to "+nm+"'s wallet! Balance: ₹"+newBal,'s');
+  el('cWCI').value='';
+  el('cqaRow').querySelectorAll('.qa-btn').forEach(function(b){b.classList.remove('sel');});
+  loadCHist();
+});
+
+// ── CONDUCTOR BLOCK CARD ──
+el('cBSearch').addEventListener('click',searchCB);
+el('cBPh').addEventListener('keyup',function(e){if(e.key==='Enter')searchCB();});
+function searchCB(){
+  var q=el('cBPh').value.trim();if(!q)return;
+  db.collection('tgrtc_users').doc(q+'_passenger').get().then(function(doc){
+    var box=el('cBPR');
+    if(doc.exists){
+      var f=doc.data();
+      el('cBPN').textContent=f.name;
+      el('cBPid').textContent='Pass ID: '+f.passId+' | 📱 '+f.phone;
+      var photoEl=el('cBPhoto');
+      if(f.photo&&f.photo.length>10){photoEl.innerHTML='<img src="'+f.photo+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" alt="photo">';}
+      else{photoEl.textContent=f.name.charAt(0).toUpperCase();}
+      if(f.blocked){
+        el('cBSt').style.cssText='padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;margin-bottom:12px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca';
+        el('cBSt').textContent='⛔ STATUS: BLOCKED';
+      } else {
+        el('cBSt').style.cssText='padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;margin-bottom:12px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0';
+        el('cBSt').textContent='● STATUS: ACTIVE';
+      }
+      box.dataset.ph=f.phone;box.dataset.nm=f.name;
+      box.classList.add('show');
+    } else {
+      al('cBA','❌ Passenger not found!','e');box.classList.remove('show');
+    }
+  }).catch(function(){al('cBA','Connection error!','e');});
+}
+
+el('cDoBlock').addEventListener('click',function(){
+  var box=el('cBPR');if(!box.classList.contains('show')){al('cBA','Search for a passenger first!','e');return;}
+  var ph=box.dataset.ph,nm=box.dataset.nm;
+  db.collection('tgrtc_users').doc(ph+'_passenger').update({blocked:true});
+  try{var u=JSON.parse(localStorage.getItem('tgU')||'{}');if(u[ph+'_passenger']){u[ph+'_passenger'].blocked=true;localStorage.setItem('tgU',JSON.stringify(u));}}catch(e){}
+  el('cBSt').style.cssText='padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;margin-bottom:12px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca';
+  el('cBSt').textContent='⛔ STATUS: BLOCKED';
+  al('cBA','🔒 '+nm+"'s card blocked!",'e');
+});
+
+el('cDoUnblock').addEventListener('click',function(){
+  var box=el('cBPR');if(!box.classList.contains('show')){al('cBA','Search for a passenger first!','e');return;}
+  var ph=box.dataset.ph,nm=box.dataset.nm;
+  db.collection('tgrtc_users').doc(ph+'_passenger').update({blocked:false});
+  try{var u=JSON.parse(localStorage.getItem('tgU')||'{}');if(u[ph+'_passenger']){u[ph+'_passenger'].blocked=false;localStorage.setItem('tgU',JSON.stringify(u));}}catch(e){}
+  el('cBSt').style.cssText='padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;margin-bottom:12px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0';
+  el('cBSt').textContent='● STATUS: ACTIVE';
+  al('cBA','🔓 '+nm+"'s card unblocked!",'s');
+});
+
+function loadCHist(){
+  if(!me)return;
+  gCH(me.phone,function(h){
+    var tb=el('cHB');if(!tb)return;
+    if(!h.length){tb.innerHTML='<tr><td colspan="5" class="te">No transactions yet</td></tr>';el('cHT').textContent='₹0';return}
+    tb.innerHTML='';var tot=0;
+    h.forEach(function(r){
+      tot+=r.am;
+      var tr=document.createElement('tr');
+      var tc=r.type==='Wallet'?'color:#0891b2':r.type==='Deduct'?'color:#dc2626':'color:#16a34a';
+      tr.innerHTML='<td style="font-size:11px">'+r.dt+'</td>'
+        +'<td>'+r.nm+'<br><span style="font-size:11px;color:#94a3b8">'+r.pid+'</span></td>'
+        +'<td><span style="'+tc+';font-weight:700">'+r.type+'</span><br><span style="font-size:11px;color:#64748b">'+r.pl+'</span></td>'
+        +'<td style="color:#16a34a;font-weight:700">₹'+r.am+'</td>'
+        +'<td style="font-size:11px;color:#64748b">'+r.exp+'</td>';
+      tb.appendChild(tr);
+    });
+    el('cHT').textContent='₹'+tot;
+  });
+}
+
+// ── ADMIN ──
+[0,1,2].forEach(function(i){
+  el('atb'+i).addEventListener('click',function(){
+    [0,1,2].forEach(function(j){el('atb'+j).classList.remove('on');el('at'+j).style.display='none';});
+    this.classList.add('on');el('at'+i).style.display='block';
+  });
+});
+
+function loadAdmin(){
+  db.collection('tgrtc_users').get().then(function(snap){
+    var ps=[];
+    snap.forEach(function(doc){var d=doc.data();if(d.role==='passenger')ps.push(d);});
+    el('aT').textContent=ps.length;
+    el('aAc').textContent=ps.filter(function(p){return !p.blocked&&p.expiry;}).length;
+    el('aBl').textContent=ps.filter(function(p){return p.blocked;}).length;
+    el('aNp').textContent=ps.filter(function(p){return !p.expiry&&!p.blocked;}).length;
+    var tb=el('aPB');if(!tb)return;
+    if(!ps.length){tb.innerHTML='<tr><td colspan="7" class="te">No passengers registered yet</td></tr>';return}
+    tb.innerHTML='';
+    ps.forEach(function(p){
+      var rt=parseRoute(p.route);
+      var st=p.blocked?'<span style="color:#d97706">⛔ Blocked</span>':p.expiry?'<span style="color:#16a34a">✅ Active</span>':'<span style="color:#94a3b8">○ No Pass</span>';
+      var ac=p.blocked
+        ?'<button style="padding:5px 12px;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;background:linear-gradient(135deg,#059669,#10b981);color:#fff" data-ph="'+p.phone+'" data-bl="0">🔓 Unblock</button>'
+        :'<button style="padding:5px 12px;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;background:linear-gradient(135deg,#b91c1c,#ef4444);color:#fff" data-ph="'+p.phone+'" data-bl="1">🔒 Block</button>';
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td>'+p.name+'</td>'
+        +'<td style="font-size:11px">'+p.passId+'</td>'
+        +'<td style="font-size:12px">'+rt.no+' — '+rt.display+'</td>'
+        +'<td style="font-size:12px">'+(p.expiry||'<span style="color:#dc2626">—</span>')+'</td>'
+        +'<td style="color:#16a34a;font-weight:700">₹'+(p.walletBalance||0)+'</td>'
+        +'<td>'+st+'</td><td>'+ac+'</td>';
+      tb.appendChild(tr);
+    });
+  });
+}
+
+el('aPB').addEventListener('click',function(e){
+  var btn=e.target.closest('[data-ph]');if(!btn)return;
+  var ph=btn.dataset.ph,bl=btn.dataset.bl==='1';
+  db.collection('tgrtc_users').doc(ph+'_passenger').update({blocked:bl}).then(function(){
+    al('aPA',bl?'🔒 Card blocked!':'🔓 Card unblocked!',bl?'e':'s');loadAdmin();
+  });
+});
+
+el('aCBtn').addEventListener('click',searchCond);
+el('aCQ').addEventListener('keyup',function(e){if(e.key==='Enter')searchCond();});
+function searchCond(){
+  var q=el('aCQ').value.trim().toLowerCase();
+  if(!q){al('aCA','Please enter Conductor ID or phone!','e');return}
+  db.collection('tgrtc_users').get().then(function(snap){
+    var f=null;
+    snap.forEach(function(doc){
+      var d=doc.data();
+      if(d.role==='conductor'&&(d.phone===q||(d.condId&&d.condId.toLowerCase()===q)))f=d;
+    });
+    var info=el('aCInfo'),tbl=el('aCTbl'),emp=el('aCEmp');
+    if(!f){al('aCA','❌ Conductor not found!','e');info.classList.remove('show');tbl.style.display='none';emp.style.display='block';return}
+    var rt=parseRoute(f.route);
+    el('aCNm').textContent='🎫 '+f.name+' ('+(f.condId||'N/A')+')';
+    el('aCRt').textContent='🛣️ '+rt.no+' — '+rt.display;
+    gCH(f.phone,function(h){
+      el('aCCnt').textContent=h.length;
+      var tb2=el('aCBody');tb2.innerHTML='';var tot=0;
+      if(!h.length){tb2.innerHTML='<tr><td colspan="5" class="te">No transactions for this conductor</td></tr>';}
+      else{
+        h.forEach(function(r){
+          tot+=r.am;
+          var tr=document.createElement('tr');
+          var tc=r.type==='Wallet'?'color:#0891b2':r.type==='Deduct'?'color:#dc2626':'color:#16a34a';
+          tr.innerHTML='<td style="font-size:11px">'+r.dt+'</td>'
+            +'<td>'+r.nm+'<br><span style="font-size:11px;color:#94a3b8">'+r.pid+'</span></td>'
+            +'<td><span style="'+tc+';font-weight:700">'+(r.type||'Pass')+'</span><br><span style="font-size:11px;color:#64748b">'+r.pl+'</span></td>'
+            +'<td style="color:#16a34a;font-weight:700">₹'+r.am+'</td>'
+            +'<td style="font-size:11px;color:#64748b">'+r.exp+'</td>';
+          tb2.appendChild(tr);
+        });
+      }
+      el('aCTot').textContent='₹'+tot;
+      info.classList.add('show');tbl.style.display='table';emp.style.display='none';
+    });
+  });
+}
+
+el('aABtn').addEventListener('click',function(){
+  var n=el('aN').value.trim(),ph=el('aPh').value.trim(),rt=el('aRt').value;
+  var plv=el('aPl').value,sd=el('aDt').value;
+  if(!n||!ph||!rt||!sd){al('aAA','Please fill Name, Phone, Route & Date!','e');return}
+  if(!/^[0-9]{10}$/.test(ph)){al('aAA','Enter a valid 10-digit phone number!','e');return}
+  var key=ph+'_passenger';
+  db.collection('tgrtc_users').doc(key).get().then(function(doc){
+    if(doc.exists){al('aAA','An account with this phone already exists!','e');return}
+    var mo=plv==='day'?0:plv==='month'?1:3;
+    var d=new Date(sd);if(mo===0){d.setDate(d.getDate()+1);}else{d.setMonth(d.getMonth()+mo);}
+    var exp=d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    var yr=new Date().getFullYear();
+    var pid='TGRTC-'+yr+'-'+String(Date.now()).slice(-5);
+    var pln=plv==='day'?'Day Pass':plv==='month'?'Monthly Pass':'3-Month Pass';
+    var data={name:n,phone:ph,password:ph.slice(-4),role:'passenger',route:rt,passId:pid,condId:'',expiry:exp,cardType:pln+' Pass',blocked:false,photo:'',walletBalance:0};
+    sUKey(key,data);
+    al('aAA','✅ Pass created! ID: '+pid+' | Default password: '+ph.slice(-4),'s');
+    el('aN').value='';el('aPh').value='';loadAdmin();
+  });
+});
+
+var aDtEl=el('aDt');if(aDtEl)aDtEl.valueAsDate=new Date();
+
+})();
+</script>
+</body>
+</html>
